@@ -48,7 +48,9 @@
           <div class="notif-badge">3</div>
         </div>
         <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
-        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="/logout" class="btn btn-outline-danger btn-sm d-flex align-items-center" title="Logout" style="text-decoration: none; padding: 4px 10px; font-family: 'Share Tech Mono', monospace; font-weight: bold; border-color: rgba(255, 59, 59, 0.4);">
+          ⏻ LOGOUT
+        </a>
         <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
           <div class="profile-avatar">AD</div>
           <span class="profile-name">Admin</span>

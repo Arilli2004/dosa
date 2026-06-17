@@ -389,6 +389,8 @@ def forgot_password():
                 cur.close()
                 conn.close()
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 flash('An error occurred. Please try again.', 'danger')
             return redirect(url_for('forgot_password'))
     return render_template('accounts/forgot_password.html')

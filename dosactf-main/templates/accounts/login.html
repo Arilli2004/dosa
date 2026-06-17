@@ -453,8 +453,8 @@
 
   <!-- ═══ LEFT PANEL ═══ -->
   <div class="left-panel">
-    <a href="/static/Images/IMages_1.png" class="lp-brand">
-      <div class="lp-logo-hex">⚔</div>
+    <a href="/" class="lp-brand">
+      <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 36px; height: 36px; object-fit: contain; border-radius: 6px;">
       <span class="lp-brand-name">DOSA CTF</span>
     </a>
 
@@ -552,7 +552,7 @@
             placeholder="••••••••••••"
             autocomplete="current-password"
             required>
-          <span class="input-suffix show-btn" id="pw-toggle" title="Show/Hide">👁</span>
+          <span class="input-suffix show-btn" id="pw-toggle" title="Show/Hide" style="cursor: pointer; color: var(--primary); font-weight: bold; font-size: 10px;">[ SHOW ]</span>
         </div>
       </div>
 
@@ -652,7 +652,7 @@
   if (!btn || !inp) return;
   btn.addEventListener('click', ()=>{
     inp.type = inp.type === 'password' ? 'text' : 'password';
-    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    btn.textContent = inp.type === 'password' ? '[ SHOW ]' : '[ HIDE ]';
   });
 })();
 
