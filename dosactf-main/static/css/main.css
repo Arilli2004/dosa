@@ -11360,3 +11360,15 @@ footer {
 }
 
 
+
+/* Fix autofill background */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px var(--bg3, #111) inset !important; -webkit-text-fill-color: var(--text, #fff) !important; transition: background-color 5000s ease-in-out 0s; }
+
+/* Perfect Mobile Interface Overrides */
+@media (max-width: 768px) {
+  .stats-row, .mid-row, .bot-row { grid-template-columns: 1fr !important; }
+  .topbar { flex-direction: column; height: auto; padding: 15px; gap: 15px; }
+  .topbar-right { width: 100%; justify-content: space-between; }
+  .main-content { padding: 15px; }
+  .stat-card { padding: 15px; }
+}
