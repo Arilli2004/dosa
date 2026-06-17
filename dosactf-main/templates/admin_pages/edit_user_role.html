@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DosaCTF — Edit User Role</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+<div class="particles" id="particles"></div>
+
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="{{ url_for('admin.admin_dashboard') }}" style="display: flex; align-items: center; text-decoration: none; gap: 10px;">
+      <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 6px;">
+      <span class="topbar-brand">DosaCTF</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-page">Admin › Edit User Role</span>
+  </div>
+        <div class="topbar-right">
+        <div class="topbar-icon-btn" title="Notifications">
+          🔔
+          <div class="notif-badge">3</div>
+        </div>
+        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+          <div class="profile-avatar">AD</div>
+          <span class="profile-name">Admin</span>
+          <span class="profile-arrow">▾</span>
+        </a>
+      </div>
+</nav>
+
+<div class="main-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">✎ Edit User Role</div>
+      <div class="page-subtitle">// SELECT A USER AND ASSIGN PERMISSIONS</div>
+    </div>
+    <a href="{{ url_for('admin.view_users') }}" class="back-btn">← Back to Users</a>
+  </div>
+
+  <div class="content-grid">
+    <!-- USER SELECT -->
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Select User</div>
+        <span class="user-count">10 USERS</span>
+      </div>
+      <div class="panel-body" style="padding:12px">
+        <div class="user-select-list" id="userList"></div>
+      </div>
+    </div>
+
+    <!-- EDIT FORM -->
+    <div>
+      <div class="panel">
+        <div class="anim-bar"></div>
+        <div class="panel-head">
+          <div class="panel-title"><div class="panel-dot"></div>Role Assignment</div>
+        </div>
+        <div class="panel-body">
+          <div class="selected-user-card" id="selectedCard">
+            <div class="sel-avatar" id="selAvatar">?</div>
+            <div>
+              <div class="sel-name" id="selName">Select a user</div>
+              <div class="sel-meta" id="selMeta">← Choose from the list</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Assign Role</div>
+            <div class="role-options">
+              <div class="role-option" onclick="selectRole('Admin')">
+                <div class="role-opt-icon">👑</div>
+                <div class="role-opt-name">ADMIN</div>
+                <div class="role-opt-desc">Full access</div>
+              </div>
+              <div class="role-option" onclick="selectRole('Player')">
+                <div class="role-opt-icon">🎮</div>
+                <div class="role-opt-name">PLAYER</div>
+                <div class="role-opt-desc">Basic access</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Permissions Preview</div>
+            <div class="permission-list" id="permList">
+              <div class="permission-item perm-active"><span class="perm-icon">✓</span>View Challenges</div>
+              <div class="permission-item perm-active"><span class="perm-icon">✓</span>Submit Flags</div>
+              <div class="permission-item perm-active"><span class="perm-icon">✓</span>Manage Users</div>
+              <div class="permission-item perm-inactive"><span class="perm-icon">✕</span>Create Challenges</div>
+              <div class="permission-item perm-inactive"><span class="perm-icon">✕</span>System Config</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Reason for Change</div>
+            <textarea class="reason-input" id="reasonInput" placeholder="Enter reason for role change (required for audit log)..."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-secondary" onclick="resetForm()">RESET</button>
+            <button class="btn-primary" onclick="saveRole()">SAVE ROLE CHANGE</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel audit-panel">
+        <div class="anim-bar"></div>
+        <div class="panel-head"><div class="panel-title"><div class="panel-dot"></div>Recent Role Changes</div></div>
+        <div class="panel-body">
+          <div class="audit-entry"><span class="audit-time">00:14</span><span class="audit-icon">✎</span><span class="audit-text"><span class="audit-hl">ZeroCool</span> promoted to <span class="audit-hl">Admin</span> by Admin</span></div>
+          <div class="audit-entry"><span class="audit-time">23:50</span><span class="audit-icon">✎</span><span class="audit-text"><span class="audit-hl">ph4nt0m</span> set to <span class="audit-hl">Moderator</span> by Admin</span></div>
+          <div class="audit-entry"><span class="audit-time">22:30</span><span class="audit-icon">✎</span><span class="audit-text"><span class="audit-hl">byte_hunter</span> demoted to <span class="audit-hl">Player</span> by Admin</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Role updated successfully</div>
+
+<script src="/static/js/main.js"></script>
+<script src="/static/js/edit_role_user.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

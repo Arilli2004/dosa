@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Dosa CTF</title>
+  <meta name="description" content="Sign in to your Dosa CTF operative account and access active challenges.">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ── RESET & ROOT ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0A0A0A;
+      --bg2:      #111111;
+      --bg3:      #1A1A1A;
+      --primary:  #D9A441;
+      --secondary:#8B5E34;
+      --accent:   #FF7A30;
+      --text:     #F5E6C8;
+      --muted:    rgba(245,230,200,0.45);
+      --border:   rgba(217,164,65,0.22);
+      --green:    #6FAF3A;
+      --red:      #FF3B3B;
+      --amber:    #FFB300;
+      --glow:     0 0 28px rgba(217,164,65,0.45);
+      --glow-sm:  0 0 10px rgba(217,164,65,0.3);
+    }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg) !important;
+      color: var(--text) !important;
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      /* cursor none removed */
+    }
+
+    /* ── SCANLINE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor-outer {
+      position: fixed; width: 42px; height: 42px;
+      border: 2px solid var(--primary); border-radius: 50%;
+      pointer-events: none; z-index: 99999;
+      transform: translate(-50%,-50%);
+      mix-blend-mode: screen;
+      background: rgba(217,164,65,0.04);
+      box-shadow: 0 0 12px rgba(217,164,65,0.3);
+      left: -100px; top: -100px;
+      transition: width .22s, height .22s, border-color .18s, background .18s;
+    }
+    #cursor-inner {
+      position: fixed; width: 8px; height: 8px;
+      background: var(--primary); border-radius: 50%;
+      pointer-events: none; z-index: 99999;
+      transform: translate(-50%,-50%);
+      box-shadow: 0 0 14px var(--primary);
+      left: -100px; top: -100px;
+    }
+    body.cursor-hover #cursor-outer {
+      width: 56px; height: 56px;
+      border-color: var(--accent);
+      background: rgba(217,164,65,0.12);
+      box-shadow: 0 0 28px rgba(217,164,65,0.55);
+    }
+    .trail-dot {
+      position: fixed; width: 4px; height: 4px;
+      background: var(--primary); border-radius: 50%;
+      pointer-events: none; z-index: 99997;
+      transform: translate(-50%,-50%);
+      animation: trail-fade 0.5s ease-out forwards;
+    }
+    @keyframes trail-fade { to { opacity: 0; transform: translate(-50%,-50%) scale(0.2); } }
+
+    /* ── PARTICLES ── */
+    #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .particle {
+      position: absolute; border-radius: 50%;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0%   { opacity: 0; transform: translateY(0) scale(.4); }
+      10%  { opacity: .5; }
+      90%  { opacity: .1; }
+      100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 480px;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      background: linear-gradient(135deg, #0d0d0d 0%, #110800 50%, #0A0A0A 100%);
+      border-right: 1px solid var(--border);
+    }
+    .left-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(217,164,65,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(217,164,65,0.06) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .lp-brand {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 14px;
+      text-decoration: none;
+    }
+    .lp-logo-hex {
+      width: 44px; height: 44px;
+      background: var(--primary);
+      clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      animation: hex-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes hex-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(217,164,65,.5); }
+      50%      { box-shadow: 0 0 0 10px rgba(217,164,65,0); }
+    }
+    .lp-brand-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px; font-weight: 900;
+      color: var(--primary);
+      text-shadow: var(--glow-sm);
+      letter-spacing: .04em;
+    }
+    .lp-main { position: relative; z-index: 1; }
+    .lp-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--primary);
+      letter-spacing: .25em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .lp-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--primary); }
+    .lp-heading {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(30px, 3.5vw, 52px);
+      font-weight: 900; line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .lp-heading span { color: var(--primary); }
+    .lp-desc {
+      font-size: 15px; color: var(--muted);
+      line-height: 1.75; max-width: 420px;
+      margin-bottom: 40px;
+    }
+    .lp-stats {
+      display: flex; gap: 32px; flex-wrap: wrap;
+    }
+    .lp-stat { display: flex; flex-direction: column; gap: 4px; }
+    .lp-stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 24px; font-weight: 900; color: var(--text);
+    }
+    .lp-stat-num span { color: var(--primary); }
+    .lp-stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: .15em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .lp-divider { width: 1px; height: 40px; background: var(--border); align-self: center; }
+    .lp-terminal {
+      position: relative; z-index: 1;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+    .lp-terminal::before {
+      content: 'AUTH-SRV-04 // CONNECTED';
+      display: block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; letter-spacing: .15em;
+      color: var(--primary); margin-bottom: 12px;
+    }
+    .term-line {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      line-height: 1.7;
+    }
+    .term-line .ok   { color: var(--green); }
+    .term-line .key  { color: var(--primary); }
+    .term-line .warn { color: var(--amber); }
+    .term-cursor {
+      display: inline-block; width: 8px; height: 14px;
+      background: var(--primary); vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+    /* ── RIGHT PANEL / FORM ── */
+    .right-panel {
+      position: relative; z-index: 2;
+      background: var(--bg2);
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 48px 40px;
+      overflow-y: auto;
+    }
+    .form-header { margin-bottom: 36px; }
+    .form-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: .2em;
+      color: var(--primary); text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .form-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 26px; font-weight: 900; color: var(--text);
+      margin-bottom: 8px;
+    }
+    .form-subtitle { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* Flash messages */
+    .flash-box {
+      padding: 11px 16px;
+      margin-bottom: 22px;
+      border-radius: 2px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .4px;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .flash-danger  { border: 1px solid var(--red);   color: var(--red);   background: rgba(255,59,59,.08); }
+    .flash-success { border: 1px solid var(--green);  color: var(--green); background: rgba(111,175,58,.08); }
+    .flash-warning { border: 1px solid var(--amber);  color: var(--amber); background: rgba(255,179,0,.08); }
+    .flash-info    { border: 1px solid var(--primary); color: var(--primary); background: rgba(217,164,65,.08); }
+
+    /* Form groups */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: 1.2px;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .form-label a {
+      color: var(--primary); text-decoration: none;
+      transition: color .2s;
+    }
+    .form-label a:hover { color: var(--accent); }
+
+    .input-wrap {
+      position: relative;
+      display: flex; align-items: center;
+    }
+    .input-icon {
+      position: absolute; left: 14px;
+      font-style: normal; font-size: 15px;
+      color: var(--muted); pointer-events: none;
+      transition: color .2s;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid rgba(217,164,65,0.18);
+      color: var(--text);
+      padding: 13px 14px 13px 42px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      cursor: text;
+    }
+    .form-input::placeholder { color: rgba(245,230,200,0.2); }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(217,164,65,0.12);
+    }
+    .form-input:focus + .input-glow { opacity: 1; }
+    .form-input.input-error { border-color: var(--red); }
+    .form-input.input-ok    { border-color: var(--green); }
+
+    .input-suffix {
+      position: absolute; right: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; /* cursor none removed */
+      color: var(--muted);
+      transition: color .2s;
+    }
+    .input-suffix:hover { color: var(--primary); }
+    .input-suffix.show-btn { /* cursor none removed */ }
+
+    /* Checkbox row */
+    .check-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 22px; /* cursor none removed */
+    }
+    .check-box {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 1.5px solid var(--border);
+      background: var(--bg3);
+      position: relative;
+      transition: border-color .2s, background .2s;
+    }
+    .check-box.on {
+      background: rgba(217,164,65,.15);
+      border-color: var(--primary);
+    }
+    .check-box.on::after {
+      content: '✓';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--primary);
+    }
+    .check-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--muted);
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      border: none;
+      color: #1a1a1a;
+      padding: 14px 24px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700; font-size: 12px;
+      letter-spacing: .12em; text-transform: uppercase;
+      /* cursor none removed */
+      clip-path: polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+      transition: all .22s;
+      margin-bottom: 20px;
+      position: relative; overflow: hidden;
+    }
+    .btn-submit::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform .4s;
+    }
+    .btn-submit:hover { background: var(--accent); box-shadow: var(--glow); color: #fff; }
+    .btn-submit:hover::after { transform: translateX(100%); }
+    .btn-submit:disabled { opacity: .6; pointer-events: none; }
+
+    /* Divider */
+    .divider-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: .15em;
+      color: var(--muted); text-transform: uppercase; white-space: nowrap;
+    }
+
+    /* Link */
+    .form-link {
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .form-link a { color: var(--primary); text-decoration: none; transition: color .2s; }
+    .form-link a:hover { color: var(--accent); }
+
+    /* Enc badge */
+    .enc-badge {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; letter-spacing: .18em;
+      color: rgba(245,230,200,0.3); text-transform: uppercase;
+      justify-content: center; margin-top: 8px;
+    }
+    .enc-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    /* Server status */
+    .server-status {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; letter-spacing: .12em;
+      color: rgba(245,230,200,0.2); text-transform: uppercase;
+    }
+
+    /* Loading state */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(26,26,26,.3);
+      border-top-color: #1a1a1a;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .page { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 32px 24px; }
+    }
+  </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+
+<!-- Floating particles -->
+<div id="particles"></div>
+
+<div class="page">
+
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="left-panel">
+    <a href="/static/Images/IMages_1.png" class="lp-brand">
+      <div class="lp-logo-hex">⚔</div>
+      <span class="lp-brand-name">DOSA CTF</span>
+    </a>
+
+    <div class="lp-main">
+      <div class="lp-eyebrow">ACCESS TERMINAL</div>
+      <h1 class="lp-heading">
+        Hack Smarter.<br>
+        <span>Rank Higher.</span>
+      </h1>
+      <p class="lp-desc">
+        Dosa CTF is the elite arena for cybersecurity operatives.
+        Solve hand-crafted challenges, capture flags, and prove your worth
+        on the global leaderboard.
+      </p>
+      <div class="lp-stats">
+        <div class="lp-stat">
+          <span class="lp-stat-num">10k<span>+</span></span>
+          <span class="lp-stat-label">Operatives</span>
+        </div>
+        <div class="lp-divider"></div>
+        <div class="lp-stat">
+          <span class="lp-stat-num">500<span>+</span></span>
+          <span class="lp-stat-label">Challenges</span>
+        </div>
+        <div class="lp-divider"></div>
+        <div class="lp-stat">
+          <span class="lp-stat-num">24<span>/7</span></span>
+          <span class="lp-stat-label">Live Events</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lp-terminal">
+      <div class="term-line"><span class="ok">[OK]</span> &nbsp;AUTH-SRV-04 — Heartbeat verified</div>
+      <div class="term-line"><span class="key">[>>]</span> Awaiting operative credentials...</div>
+      <div class="term-line"><span class="ok">[OK]</span> TLS 1.3 encryption active</div>
+      <div class="term-line"><span class="key">[>>]</span> Enter passphrase to continue <span class="term-cursor"></span></div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL / FORM ═══ -->
+  <div class="right-panel">
+
+    <div class="form-header">
+      <div class="form-eyebrow">⬡ AUTHENTICATION PROTOCOL</div>
+      <h2 class="form-title">Operative Sign In</h2>
+      <p class="form-subtitle">Enter your credentials to access active challenges and the mission terminal.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-box flash-{{ category }}">
+            <span>{% if category == 'danger' %}⚠{% elif category == 'success' %}✓{% else %}ℹ{% endif %}</span>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- LOGIN FORM -->
+    <form method="POST" action="/login" id="login-form" novalidate>
+
+      <!-- Username / Email -->
+      <div class="form-group">
+        <label class="form-label" for="username">Username or Email</label>
+        <div class="input-wrap">
+          <i class="input-icon">✉</i>
+          <input
+            class="form-input"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="operative@flaghunt.io"
+            value="{{ form_identifier }}"
+            autocomplete="username"
+            required>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="form-label" for="password">
+          <span>Password</span>
+          <a href="/forgot-password">Forgot password?</a>
+        </label>
+        <div class="input-wrap">
+          <i class="input-icon">🔒</i>
+          <input
+            class="form-input"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••••••"
+            autocomplete="current-password"
+            required>
+          <span class="input-suffix show-btn" id="pw-toggle" title="Show/Hide">👁</span>
+        </div>
+      </div>
+
+      <!-- Remember me -->
+      <label class="check-row" style="cursor: pointer;">
+        <input type="checkbox" name="remember" id="remember-checkbox" style="display:none;">
+        <div class="check-box" id="remember-box"></div>
+        <span class="check-lbl">Remember this device for 30 days</span>
+      </label>
+
+      <!-- Submit -->
+      <button class="btn-submit" type="submit" id="submit-btn">
+        Access Terminal &nbsp;→
+      </button>
+
+    </form>
+
+    <div class="divider-row">
+      <div class="divider-line"></div>
+      <span class="divider-text">New Operative?</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="form-link">
+      No operative ID yet? <a href="/register">Create an account →</a>
+    </div>
+
+    <div class="enc-badge">
+      <div class="enc-dot"></div>
+      Encrypted Connection Active
+    </div>
+    <div class="server-status">
+      Auth-SRV-04 &nbsp;·&nbsp; TLS 1.3 &nbsp;·&nbsp; ONLINE
+    </div>
+
+  </div><!-- /right-panel -->
+</div><!-- /page -->
+
+
+<script>
+/* ── PARTICLES ── */
+(function(){
+  const c = document.getElementById('particles');
+  for (let i = 0; i < 30; i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left   = Math.random()*100+'vw';
+    p.style.bottom = '-8px';
+    p.style.animationDuration  = (8+Math.random()*14)+'s';
+    p.style.animationDelay    = (Math.random()*10)+'s';
+    const sz = Math.random() > .6 ? 3 : 2;
+    p.style.width = p.style.height = sz+'px';
+    p.style.background = Math.random()>.5 ? 'var(--primary)' : 'var(--accent)';
+    c.appendChild(p);
+  }
+})();
+
+/* ── CURSOR ── */
+(function(){
+  const co = document.getElementById('cursor-outer');
+  const ci = document.getElementById('cursor-inner');
+  let mx=0,my=0,ox=0,oy=0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    ci.style.left = mx+'px'; ci.style.top = my+'px';
+
+    // trail
+    const t = document.createElement('div');
+    t.className = 'trail-dot';
+    t.style.left = mx+'px'; t.style.top = my+'px';
+    document.body.appendChild(t);
+    setTimeout(()=> t.remove(), 500);
+
+    requestAnimationFrame(()=>{
+      ox += (mx-ox)*.22; oy += (my-oy)*.22;
+      co.style.left = ox+'px'; co.style.top = oy+'px';
+    });
+  });
+
+  document.querySelectorAll('a,button,.check-box,.input-suffix').forEach(el=>{
+    el.addEventListener('mouseenter', ()=> document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', ()=> document.body.classList.remove('cursor-hover'));
+  });
+
+  // hide cursor on input hover
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('mouseenter', ()=>{ co.style.opacity='0'; ci.style.opacity='0'; });
+    inp.addEventListener('mouseleave', ()=>{ co.style.opacity='1'; ci.style.opacity='1'; });
+  });
+})();
+
+/* ── SHOW/HIDE PASSWORD ── */
+(function(){
+  const btn = document.getElementById('pw-toggle');
+  const inp = document.getElementById('password');
+  if (!btn || !inp) return;
+  btn.addEventListener('click', ()=>{
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  });
+})();
+
+/* ── REMEMBER CHECKBOX ── */
+(function(){
+  const box = document.getElementById('remember-box');
+  const chk = document.getElementById('remember-checkbox');
+  if (!box || !chk) return;
+  box.parentElement.addEventListener('click', (e)=> {
+    if(e.target !== chk) chk.checked = !chk.checked;
+    if(chk.checked) box.classList.add('on');
+    else box.classList.remove('on');
+  });
+})();
+
+/* ── SUBMIT LOADING STATE ── */
+(function(){
+  const form = document.getElementById('login-form');
+  const btn  = document.getElementById('submit-btn');
+  if (!form || !btn) return;
+  form.addEventListener('submit', ()=>{
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    if (u && p){
+      btn.innerHTML = '<span class="spinner"></span> Authenticating...';
+      btn.disabled = true;
+    }
+  });
+})();
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Password Visibility Toggle
+      document.querySelectorAll('.pwd-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const input = this.previousElementSibling;
+          if (input.type === 'password') {
+            input.type = 'text';
+            this.textContent = '👁‍🗨'; // Optional: Use different icon when visible
+            this.style.color = 'var(--primary)';
+          } else {
+            input.type = 'password';
+            this.textContent = '👁';
+            this.style.color = 'var(--muted)';
+          }
+        });
+      });
+    </script>
+
+</body>
+</html>

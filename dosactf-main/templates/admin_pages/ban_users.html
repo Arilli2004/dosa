@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlagHunt CTF — Ban Users</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --bg2: #111111;
+        --bg3: #181818;
+        --primary: #D9A441;
+        --secondary: #8B5E34;
+        --text: #F5E6C8;
+        --accent: #FF7A30;
+        --muted: rgba(245, 230, 200, 0.45);
+        --border: rgba(217, 164, 65, 0.22);
+        --border2: rgba(245, 230, 200, 0.08);
+        --glow: 0 0 28px rgba(217, 164, 65, 0.45);
+        --glow-sm: 0 0 10px rgba(217, 164, 65, 0.3);
+        --green: #00e676;
+        --amber: #ffb300;
+        --blue: #3b8bff;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: "Rajdhani", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+        /* cursor none removed */
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          rgba(0, 0, 0, 0.07) 2px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        pointer-events: none;
+        z-index: 9998;
+      }
+      #cursor-outer {
+        position: fixed;
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: screen;
+        background: rgba(255, 59, 59, 0.03);
+        box-shadow: 0 0 12px rgba(255, 59, 59, 0.3);
+        left: -100px;
+        top: -100px;
+        transition:
+          width 0.25s,
+          height 0.25s,
+          border-color 0.2s;
+      }
+      #cursor-inner {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 16px var(--primary);
+        left: -100px;
+        top: -100px;
+      }
+      body.cursor-hover #cursor-outer {
+        width: 56px;
+        height: 56px;
+        border-color: var(--accent);
+        background: rgba(255, 59, 59, 0.15);
+        box-shadow: 0 0 28px rgba(255, 59, 59, 0.6);
+      }
+      .trail-particle {
+        position: fixed;
+        width: 5px;
+        height: 5px;
+        background: radial-gradient(circle, var(--accent), var(--primary));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99997;
+        transform: translate(-50%, -50%);
+        animation: trailFade 0.6s ease-out forwards;
+      }
+      @keyframes trailFade {
+        0% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.1);
+        }
+      }
+      .click-spark {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99996;
+        transform: translate(-50%, -50%);
+        animation: sparkBurst 0.5s ease-out forwards;
+      }
+      @keyframes sparkBurst {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(
+              calc(-50% + var(--tx, 0px) * 2),
+              calc(-50% + var(--ty, 0px) * 2)
+            )
+            scale(0);
+        }
+      }
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .particle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0;
+        animation: float-up linear infinite;
+      }
+      @keyframes float-up {
+        0% {
+          opacity: 0;
+          transform: translateY(0);
+        }
+        10% {
+          opacity: 0.5;
+        }
+        90% {
+          opacity: 0.1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-100vh);
+        }
+      }
+      @keyframes bar-slide {
+        0% {
+          background-position: 0%;
+        }
+        100% {
+          background-position: 200%;
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes hex-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(255, 59, 59, 0);
+        }
+      }
+      @keyframes warningPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 12px rgba(255, 59, 59, 0);
+        }
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-6px);
+        }
+        75% {
+          transform: translateX(6px);
+        }
+      }
+      .anim-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--secondary),
+          var(--primary),
+          var(--accent),
+          var(--primary),
+          var(--secondary)
+        );
+        background-size: 200% 100%;
+        animation: bar-slide 3s linear infinite;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 500;
+        height: 58px;
+        background: rgba(10, 10, 10, 0.95);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(14px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo-hex {
+        width: 30px;
+        height: 30px;
+        background: var(--primary);
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        animation: hex-pulse 2.5s ease-in-out infinite;
+      }
+      .topbar-brand {
+        font-family: "Orbitron", monospace;
+        font-weight: 900;
+        font-size: 16px;
+        color: var(--primary);
+        text-shadow: var(--glow-sm);
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        /* cursor none removed */
+      }
+      .topbar-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--border);
+      }
+      .topbar-page {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .topbar-icon-btn {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border2);
+        background: var(--bg2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .topbar-icon-btn:hover {
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.08);
+      }
+      .notif-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary);
+        font-size: 8px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .topbar-profile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        padding: 4px 12px 4px 6px;
+        /* cursor none removed */
+        transition: border-color 0.2s;
+      }
+      .topbar-profile:hover {
+        border-color: var(--primary);
+      }
+      .profile-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+      }
+      .profile-name {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        color: var(--muted);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        text-decoration: none;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .back-btn:hover {
+        border-color: var(--primary);
+        color: var(--text);
+      }
+      .main-content {
+        padding: 28px 32px 48px;
+        position: relative;
+        z-index: 1;
+      }
+      .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-title {
+        font-family: "Orbitron", monospace;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: var(--glow-sm);
+      }
+      .page-subtitle {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 1px;
+        margin-top: 6px;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 20px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease both;
+      }
+      .panel-head {
+        padding: 14px 18px 12px;
+        border-bottom: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .panel-title {
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 6px var(--primary);
+        animation: blink 1.5s ease-in-out infinite;
+      }
+      .panel-body {
+        padding: 20px 18px;
+      }
+
+      /* USER TABLE */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead th {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      tbody tr {
+        border-bottom: 1px solid var(--border2);
+        transition: background 0.18s;
+      }
+      tbody tr:hover {
+        background: rgba(255, 59, 59, 0.04);
+      }
+      td {
+        padding: 12px 16px;
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      .u-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .u-av {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .u-nm {
+        font-weight: 600;
+      }
+      .u-id {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        border: 1px solid;
+        border-radius: 1px;
+      }
+      .s-active {
+        color: var(--green);
+        border-color: var(--green);
+        background: rgba(0, 230, 118, 0.07);
+      }
+      .s-banned {
+        color: var(--primary);
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.1);
+      }
+      .s-inactive {
+        color: var(--muted);
+        border-color: var(--border2);
+      }
+      .risk-bar {
+        width: 80px;
+        height: 4px;
+        background: var(--bg3);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .risk-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
+      .risk-low {
+        background: var(--green);
+      }
+      .risk-med {
+        background: var(--amber);
+      }
+      .risk-high {
+        background: var(--primary);
+        box-shadow: 0 0 6px var(--primary);
+        animation: blink 1s infinite;
+      }
+      .ban-btn {
+        padding: 5px 14px;
+        border: 1px solid var(--primary);
+        background: rgba(255, 59, 59, 0.08);
+        color: var(--primary);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        /* cursor none removed */
+        transition: all 0.2s;
+        letter-spacing: 0.5px;
+      }
+      .ban-btn:hover {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: var(--glow-sm);
+      }
+      .unban-btn {
+        padding: 5px 14px;
+        border: 1px solid var(--green);
+        background: rgba(0, 230, 118, 0.07);
+        color: var(--green);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        /* cursor none removed */
+        transition: all 0.2s;
+        letter-spacing: 0.5px;
+      }
+      .unban-btn:hover {
+        background: var(--green);
+        color: #000;
+      }
+
+      /* BAN FORM PANEL */
+      .warning-box {
+        background: rgba(255, 59, 59, 0.07);
+        border: 1px solid rgba(255, 59, 59, 0.4);
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: warningPulse 2s ease-in-out infinite;
+      }
+      .warning-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .warning-text {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        line-height: 1.7;
+        letter-spacing: 0.3px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .form-label::before {
+        content: "›";
+        color: var(--primary);
+        font-size: 14px;
+      }
+      .form-select {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 10px 14px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+        /* cursor none removed */
+      }
+      .form-select:focus {
+        border-color: var(--primary);
+      }
+      .form-input {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 10px 14px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .form-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(255, 59, 59, 0.18);
+        cursor: text;
+      }
+      .form-input::placeholder {
+        color: var(--muted);
+      }
+      .target-display {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .target-av {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        border: 2px solid var(--primary);
+        box-shadow: 0 0 8px rgba(255, 59, 59, 0.4);
+      }
+      .target-name {
+        font-family: "Orbitron", monospace;
+        font-size: 13px;
+        font-weight: 900;
+      }
+      .target-id {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .btn-ban {
+        width: 100%;
+        background: var(--primary);
+        border: none;
+        color: #fff;
+        padding: 13px 20px;
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        /* cursor none removed */
+        clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        transition: all 0.22s;
+        margin-top: 8px;
+      }
+      .btn-ban:hover {
+        background: #cc0000;
+        box-shadow: var(--glow);
+        transform: translateY(-2px);
+      }
+      .btn-ban:active {
+        animation: shake 0.3s ease;
+      }
+      .banned-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .banned-list::-webkit-scrollbar {
+        width: 3px;
+      }
+      .banned-list::-webkit-scrollbar-thumb {
+        background: var(--primary);
+      }
+      .banned-entry {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: rgba(255, 59, 59, 0.06);
+        border: 1px solid rgba(255, 59, 59, 0.2);
+        font-size: 12px;
+      }
+      .banned-name {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        flex: 1;
+      }
+      .banned-reason {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--bg2);
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        padding: 14px 22px;
+        z-index: 9999;
+        transform: translateY(60px);
+        opacity: 0;
+        transition: all 0.35s;
+        letter-spacing: 0.5px;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      @media (max-width: 900px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+  <body>
+    <div id="cursor-outer"></div>
+    <div id="cursor-inner"></div>
+    <div class="particles" id="particles"></div>
+
+    <nav class="topbar">
+      <div class="topbar-left">
+        <div class="logo-hex">⚑</div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="topbar-brand">DosaCTF</a>
+        <div class="topbar-divider"></div>
+        <span class="topbar-page">Admin › Ban Users</span>
+      </div>
+            <div class="topbar-right">
+        <div class="topbar-icon-btn" title="Notifications">
+          🔔
+          <div class="notif-badge">3</div>
+        </div>
+        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+          <div class="profile-avatar">AD</div>
+          <span class="profile-name">Admin</span>
+          <span class="profile-arrow">▾</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⊘ Ban Users</div>
+          <div class="page-subtitle">
+            // ENFORCE NETWORK SECURITY — OPERATOR LOCKOUT SYSTEM
+          </div>
+        </div>
+        <a href="{{ url_for('admin.view_users') }}" class="back-btn">← Back to Users</a>
+      </div>
+
+      <div class="content-grid">
+        <!-- USER TABLE -->
+        <div class="panel">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Active Operators
+            </div>
+            <span
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 10px;
+                color: var(--muted);
+              "
+              >RISK SORTED</span
+            >
+          </div>
+          <div class="panel-body" style="padding: 0">
+            <table>
+              <thead>
+                <tr>
+                  <th>USER</th>
+                  <th>STATUS</th>
+                  <th>FLAGS</th>
+                  <th>RISK</th>
+                  <th>JOIN DATE</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="userTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BAN FORM -->
+        <div>
+          <div class="panel">
+            <div class="anim-bar"></div>
+            <div class="panel-head">
+              <div class="panel-title">
+                <div class="panel-dot"></div>
+                Ban / Unban User
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="warning-box">
+                <div class="warning-icon">⚠</div>
+                <div class="warning-text">
+                  This action will immediately revoke the user's access to all
+                  CTF resources. Ensure you have reviewed all activity logs
+                  before proceeding.
+                </div>
+              </div>
+              <div class="target-display" id="targetDisplay">
+                <div class="target-av" id="targetAv">?</div>
+                <div>
+                  <div class="target-name" id="targetName">Select a user</div>
+                  <div class="target-id" id="targetId">
+                    Click "BAN" on any row
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-label">Ban Reason</div>
+                <select class="form-select" id="banReason">
+                  <option>Cheating / Flag Sharing</option>
+                  <option>Spam / Abuse</option>
+                  <option>Botnet / Automation</option>
+                  <option>Exploiting Platform</option>
+                  <option>Inappropriate Content</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">Ban Duration</div>
+                <select class="form-select" id="banDuration">
+                  <option>Warning</option>
+                  <option>24 Hours</option>
+                  <option>7 Days</option>
+                  <option>30 Days</option>
+                  <option>Permanent</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">Additional Notes</div>
+                <input
+                  class="form-input"
+                  placeholder="Optional: additional context..."
+                  id="banNotes"
+                />
+              </div>
+              <button class="btn-ban" onclick="executeBan()">
+                ⊘ EXECUTE BAN
+              </button>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top: 16px; animation-delay: 0.2s">
+            <div class="anim-bar"></div>
+            <div class="panel-head">
+              <div class="panel-title">
+                <div class="panel-dot"></div>
+                Recently Banned
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="banned-list" id="bannedList">
+                <div class="banned-entry">
+                  <span style="font-size: 14px">⊘</span
+                  ><span class="banned-name">NoobHax0r</span
+                  ><span class="banned-reason">Cheating</span>
+                </div>
+                <div class="banned-entry">
+                  <span style="font-size: 14px">⊘</span
+                  ><span class="banned-name">spambot_42</span
+                  ><span class="banned-reason">Spam / Automation</span>
+                </div>
+                <div class="banned-entry">
+                  <span style="font-size: 14px">⊘</span
+                  ><span class="banned-name">suspicious_op</span
+                  ><span class="banned-reason">Exploiting Platform</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">⊘ User banned</div>
+
+    <script>
+      let users = [];
+      let selectedUser = null;
+
+      function initials(n) {
+        return n
+          .split(/[_\s]/)
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+      }
+      function riskFill(r) {
+        return r === "high"
+          ? "risk-fill risk-high"
+          : r === "med"
+            ? "risk-fill risk-med"
+            : "risk-fill risk-low";
+      }
+      function riskWidth(r) {
+        return r === "high" ? "90%" : r === "med" ? "55%" : "20%";
+      }
+
+      function renderTable() {
+        document.getElementById("userTable").innerHTML = users
+          .map((u) => {
+            const status = u.status.toLowerCase();
+            const flagsCount = Math.floor(u.score / 10);
+            const risk = status === "banned" ? "high" : "low";
+            
+            return `
+    <tr>
+      <td><div class="u-cell"><div class="u-av">${initials(u.name)}</div><div><div class="u-nm">${u.name}</div><div class="u-id">${u.id}</div></div></div></td>
+      <td><span class="status-badge ${status === "active" ? "s-active" : status === "banned" ? "s-banned" : "s-inactive"}">${u.status}</span></td>
+      <td><span style="font-family:'Orbitron',monospace;font-size:13px;color:var(--accent)">${flagsCount}</span></td>
+      <td><div class="risk-bar"><div class="${riskFill(risk)}" style="width:${riskWidth(risk)}"></div></div></td>
+      <td><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)">${u.joined}</span></td>
+      <td>${
+        status === "banned"
+          ? `<button class="unban-btn" onclick="selectForBan('${u.db_id}',true)">UNBAN</button>`
+          : `<button class="ban-btn" onclick="selectForBan('${u.db_id}',false)">BAN</button>`
+      }</td>
+    </tr>`;
+          })
+          .join("");
+      }
+
+      function selectForBan(dbId, isUnban) {
+        selectedUser = users.find((u) => u.db_id == dbId);
+        if (!selectedUser) return;
+        
+        document.getElementById("targetAv").textContent = initials(selectedUser.name);
+        document.getElementById("targetName").textContent = selectedUser.name;
+        document.getElementById("targetId").textContent =
+          selectedUser.id + (isUnban ? " — Currently BANNED" : " — Currently active");
+        document.querySelector(".btn-ban").textContent = isUnban
+          ? "✓ UNBAN USER"
+          : "⊘ EXECUTE BAN";
+        document.querySelector(".btn-ban").style.background = isUnban
+          ? "var(--green)"
+          : "var(--primary)";
+      }
+
+      function executeBan() {
+        if (!selectedUser) {
+          showToast("⚠ Select a user first", "var(--amber)");
+          return;
+        }
+        
+        const isBanned = selectedUser.status.toLowerCase() === "banned";
+        const newStatus = isBanned ? "active" : "banned";
+        const dbId = selectedUser.db_id;
+
+        fetch(`/api/admin/users/status/${dbId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: newStatus })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            if (newStatus === "banned") {
+              const reason = document.getElementById("banReason").value || "Policy violation";
+              const bl = document.getElementById("bannedList");
+              const entry = document.createElement("div");
+              entry.className = "banned-entry";
+              entry.innerHTML = `<span style="font-size:14px">⊘</span><span class="banned-name">${selectedUser.name}</span><span class="banned-reason">${reason}</span>`;
+              bl.insertBefore(entry, bl.firstChild);
+              showToast(
+                "⊘ " + selectedUser.name + " has been banned",
+                "var(--primary)"
+              );
+            } else {
+              showToast(
+                "✓ " + selectedUser.name + " has been unbanned",
+                "var(--green)"
+              );
+            }
+            selectedUser = null;
+            document.getElementById("targetAv").textContent = "?";
+            document.getElementById("targetName").textContent = "Select a user";
+            document.getElementById("targetId").textContent = 'Click "BAN" on any row';
+            document.querySelector(".btn-ban").textContent = "⊘ EXECUTE BAN";
+            document.querySelector(".btn-ban").style.background = "var(--primary)";
+            loadUsers();
+          } else {
+            showToast("⚠ " + data.message, "var(--primary)");
+          }
+        })
+        .catch(err => {
+          console.error("Error executing status update:", err);
+          showToast("⚠ Error connecting to server", "var(--primary)");
+        });
+      }
+
+      function showToast(msg, color) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.style.borderColor = color;
+        t.style.color = color;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      function loadUsers() {
+        fetch('/api/admin/users')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              users = data.users;
+              renderTable();
+              if (selectedUser) {
+                const updated = users.find(u => u.db_id === selectedUser.db_id);
+                if (updated) {
+                  selectedUser = updated;
+                  const isBanned = updated.status.toLowerCase() === "banned";
+                  document.getElementById("targetId").textContent =
+                    updated.id + (isBanned ? " — Currently BANNED" : " — Currently active");
+                }
+              }
+            }
+          })
+          .catch(err => console.error("Error loading users for ban management:", err));
+      }
+
+      // Initial load
+      loadUsers();
+
+      // Poll every 3 seconds for real-time list update
+      setInterval(loadUsers, 3000);
+
+      const pC = document.getElementById("particles");
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.bottom = "-10px";
+        p.style.animationDuration = 7 + Math.random() * 14 + "s";
+        p.style.animationDelay = Math.random() * 12 + "s";
+        const sz = Math.random() > 0.6 ? 3 : 2;
+        p.style.width = p.style.height = sz + "px";
+        p.style.background =
+          Math.random() > 0.5 ? "var(--primary)" : "var(--accent)";
+        pC.appendChild(p);
+      }
+      const cO = document.getElementById("cursor-outer"),
+        cI = document.getElementById("cursor-inner");
+      let mX = 0,
+        mY = 0,
+        oX = 0,
+        oY = 0,
+        inInput = false;
+      document.addEventListener("mousemove", (e) => {
+        mX = e.clientX;
+        mY = e.clientY;
+        if (!inInput) {
+          cI.style.left = mX + "px";
+          cI.style.top = mY + "px";
+        }
+        requestAnimationFrame(() => {
+          oX += (mX - oX) * 0.25;
+          oY += (mY - oY) * 0.25;
+          if (!inInput) {
+            cO.style.left = oX + "px";
+            cO.style.top = oY + "px";
+          }
+        });
+        if (!inInput) {
+          const p = document.createElement("div");
+          p.className = "trail-particle";
+          p.style.left = mX + "px";
+          p.style.top = mY + "px";
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 600);
+        }
+      });
+      document
+        .querySelectorAll("a,button,.topbar-icon-btn,tr")
+        .forEach((el) => {
+          el.addEventListener("mouseenter", () =>
+            document.body.classList.add("cursor-hover"),
+          );
+          el.addEventListener("mouseleave", () =>
+            document.body.classList.remove("cursor-hover"),
+          );
+        });
+      document.querySelectorAll(".form-input,.form-select").forEach((inp) => {
+        inp.style.cursor = "text";
+        inp.addEventListener("mouseenter", () => {
+          inInput = true;
+          cO.style.opacity = "0";
+          cI.style.opacity = "0";
+        });
+        inp.addEventListener("mouseleave", () => {
+          inInput = false;
+          cO.style.opacity = "1";
+          cI.style.opacity = "1";
+        });
+      });
+      document.addEventListener("click", (e) => {
+        for (let i = 0; i < 6; i++) {
+          const s = document.createElement("div");
+          s.className = "click-spark";
+          const a = (i / 6) * Math.PI * 2;
+          s.style.setProperty("--tx", Math.cos(a) * 20 + "px");
+          s.style.setProperty("--ty", Math.sin(a) * 20 + "px");
+          s.style.left = e.clientX + "px";
+          s.style.top = e.clientY + "px";
+          document.body.appendChild(s);
+          setTimeout(() => s.remove(), 500);
+        }
+      });
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

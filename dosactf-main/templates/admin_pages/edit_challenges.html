@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlagHunt CTF — Edit Challenges</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --bg2: #111111;
+        --bg3: #181818;
+        --primary: #D9A441;
+        --secondary: #8B5E34;
+        --text: #F5E6C8;
+        --accent: #FF7A30;
+        --muted: rgba(245, 230, 200, 0.45);
+        --border: rgba(217, 164, 65, 0.22);
+        --border2: rgba(245, 230, 200, 0.08);
+        --glow: 0 0 28px rgba(217, 164, 65, 0.45);
+        --glow-sm: 0 0 10px rgba(217, 164, 65, 0.3);
+        --green: #00e676;
+        --amber: #ffb300;
+        --blue: #3b8bff;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: "Rajdhani", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+        /* cursor none removed */
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          rgba(0, 0, 0, 0.07) 2px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        pointer-events: none;
+        z-index: 9998;
+      }
+      #cursor-outer {
+        position: fixed;
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: screen;
+        background: rgba(255, 59, 59, 0.03);
+        box-shadow: 0 0 12px rgba(255, 59, 59, 0.3);
+        left: -100px;
+        top: -100px;
+        transition:
+          width 0.25s,
+          height 0.25s,
+          border-color 0.2s;
+      }
+      #cursor-inner {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 16px var(--primary);
+        left: -100px;
+        top: -100px;
+      }
+      body.cursor-hover #cursor-outer {
+        width: 56px;
+        height: 56px;
+        border-color: var(--accent);
+        background: rgba(255, 59, 59, 0.15);
+        box-shadow: 0 0 28px rgba(255, 59, 59, 0.6);
+      }
+      .trail-particle {
+        position: fixed;
+        width: 5px;
+        height: 5px;
+        background: radial-gradient(circle, var(--accent), var(--primary));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99997;
+        transform: translate(-50%, -50%);
+        animation: trailFade 0.6s ease-out forwards;
+      }
+      @keyframes trailFade {
+        0% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.1);
+        }
+      }
+      .click-spark {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99996;
+        transform: translate(-50%, -50%);
+        animation: sparkBurst 0.5s ease-out forwards;
+      }
+      @keyframes sparkBurst {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(
+              calc(-50% + var(--tx, 0px) * 2),
+              calc(-50% + var(--ty, 0px) * 2)
+            )
+            scale(0);
+        }
+      }
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .particle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0;
+        animation: float-up linear infinite;
+      }
+      @keyframes float-up {
+        0% {
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-100vh);
+        }
+      }
+      @keyframes bar-slide {
+        0% {
+          background-position: 0%;
+        }
+        100% {
+          background-position: 200%;
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes hex-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(255, 59, 59, 0);
+        }
+      }
+      @keyframes slideRight {
+        from {
+          opacity: 0;
+          transform: translateX(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .anim-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--secondary),
+          var(--primary),
+          var(--accent),
+          var(--primary),
+          var(--secondary)
+        );
+        background-size: 200% 100%;
+        animation: bar-slide 3s linear infinite;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 500;
+        height: 58px;
+        background: rgba(10, 10, 10, 0.95);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(14px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo-hex {
+        width: 30px;
+        height: 30px;
+        background: var(--primary);
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        animation: hex-pulse 2.5s ease-in-out infinite;
+      }
+      .topbar-brand {
+        font-family: "Orbitron", monospace;
+        font-weight: 900;
+        font-size: 16px;
+        color: var(--primary);
+        text-shadow: var(--glow-sm);
+        text-decoration: none;
+        /* cursor none removed */
+      }
+      .topbar-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--border);
+      }
+      .topbar-page {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .topbar-icon-btn {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border2);
+        background: var(--bg2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .topbar-icon-btn:hover {
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.08);
+      }
+      .notif-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary);
+        font-size: 8px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .topbar-profile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        padding: 4px 12px 4px 6px;
+        /* cursor none removed */
+        transition: border-color 0.2s;
+      }
+      .topbar-profile:hover {
+        border-color: var(--primary);
+      }
+      .profile-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+      }
+      .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        color: var(--muted);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        text-decoration: none;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .back-btn:hover {
+        border-color: var(--primary);
+        color: var(--text);
+      }
+      .main-content {
+        padding: 28px 32px 48px;
+        position: relative;
+        z-index: 1;
+      }
+      .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-title {
+        font-family: "Orbitron", monospace;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .page-subtitle {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 1px;
+        margin-top: 6px;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease both;
+      }
+      .panel-head {
+        padding: 14px 18px 12px;
+        border-bottom: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .panel-title {
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 6px var(--primary);
+        animation: blink 1.5s ease-in-out infinite;
+      }
+      .panel-body {
+        padding: 0;
+      }
+      /* CHALLENGE LIST */
+      .chal-search {
+        padding: 12px;
+        border-bottom: 1px solid var(--border2);
+      }
+      .chal-search input {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 8px 12px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .chal-search input:focus {
+        border-color: var(--primary);
+      }
+      .chal-search input::placeholder {
+        color: var(--muted);
+      }
+      .chal-list {
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+      }
+      .chal-list::-webkit-scrollbar {
+        width: 3px;
+      }
+      .chal-list::-webkit-scrollbar-thumb {
+        background: var(--primary);
+      }
+      .chal-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border2);
+        /* cursor none removed */
+        transition: all 0.18s;
+        position: relative;
+      }
+      .chal-item:hover {
+        background: rgba(255, 59, 59, 0.05);
+      }
+      .chal-item.active {
+        background: rgba(255, 59, 59, 0.1);
+        border-left: 3px solid var(--primary);
+      }
+      .chal-item.active .chal-name {
+        color: var(--primary);
+      }
+      .chal-cat-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+        width: 28px;
+        text-align: center;
+      }
+      .chal-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .chal-name {
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .chal-meta {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .chal-pts {
+        font-family: "Orbitron", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+      .diff-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .d-easy {
+        background: var(--green);
+      }
+      .d-med {
+        background: var(--amber);
+      }
+      .d-hard {
+        background: var(--primary);
+      }
+      .d-insane {
+        background: #a855f7;
+      }
+      /* EDIT FORM */
+      .edit-panel {
+        animation: slideRight 0.4s ease both;
+      }
+      .form-section {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border2);
+      }
+      .form-section:last-child {
+        border-bottom: none;
+      }
+      .section-label {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: var(--primary);
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .form-row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .form-group {
+        margin-bottom: 14px;
+      }
+      .form-group:last-child {
+        margin-bottom: 0;
+      }
+      .form-label {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1.2px;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 7px;
+        display: block;
+      }
+      .form-input {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 12px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .form-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(255, 59, 59, 0.15);
+      }
+      .form-input::placeholder {
+        color: var(--muted);
+      }
+      .form-select {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 12px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+        /* cursor none removed */
+      }
+      .form-select:focus {
+        border-color: var(--primary);
+      }
+      .form-textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 12px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+        resize: vertical;
+        min-height: 90px;
+        line-height: 1.6;
+      }
+      .form-textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(255, 59, 59, 0.15);
+      }
+      .form-textarea::placeholder {
+        color: var(--muted);
+      }
+      .visibility-row {
+        display: flex;
+        gap: 8px;
+      }
+      .vis-btn {
+        flex: 1;
+        border: 1px solid var(--border2);
+        background: var(--bg3);
+        padding: 9px 8px;
+        /* cursor none removed */
+        transition: all 0.2s;
+        text-align: center;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .vis-btn:hover {
+        border-color: var(--border);
+      }
+      .vis-btn.sel {
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.1);
+        color: var(--text);
+      }
+      .solve-bar {
+        height: 5px;
+        background: var(--bg3);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      .solve-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--secondary), var(--primary));
+        border-radius: 3px;
+      }
+      .btn-row {
+        display: flex;
+        gap: 10px;
+        padding: 18px 20px;
+      }
+      .btn-save {
+        flex: 2;
+        background: var(--primary);
+        border: none;
+        color: #fff;
+        padding: 12px 20px;
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        /* cursor none removed */
+        clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        transition: all 0.22s;
+      }
+      .btn-save:hover {
+        background: var(--accent);
+        box-shadow: var(--glow);
+        transform: translateY(-2px);
+      }
+      .btn-cancel {
+        flex: 1;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 12px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        /* cursor none removed */
+        transition: all 0.2s;
+      }
+      .btn-cancel:hover {
+        border-color: var(--primary);
+        color: var(--text);
+      }
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 30px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .empty-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+        opacity: 0.4;
+      }
+      .empty-text {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+      }
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--bg2);
+        border: 1px solid var(--green);
+        color: var(--green);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        padding: 14px 22px;
+        z-index: 9999;
+        transform: translateY(60px);
+        opacity: 0;
+        transition: all 0.35s;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      @media (max-width: 900px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        .form-row2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .file-drop.dragover {
+        border-color: var(--accent) !important;
+        background: rgba(255, 122, 48, 0.08) !important;
+      }
+      .file-drop.uploading {
+        border-color: var(--amber) !important;
+        background: rgba(255, 179, 0, 0.05) !important;
+        cursor: wait;
+      }
+      .file-drop.success {
+        border-color: var(--green) !important;
+        background: rgba(0, 230, 118, 0.05) !important;
+      }
+      .file-drop.error {
+        border-color: #ff3b3b !important;
+        background: rgba(255, 59, 59, 0.05) !important;
+      }
+    </style>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+  <body>
+    <div id="cursor-outer"></div>
+    <div id="cursor-inner"></div>
+    <div class="particles" id="particles"></div>
+
+    <nav class="topbar">
+      <div class="topbar-left">
+        <div class="logo-hex">⚑</div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="topbar-brand">DosaCTF</a>
+        <div class="topbar-divider"></div>
+        <span class="topbar-page">Admin › Edit Challenges</span>
+      </div>
+            <div class="topbar-right">
+        <div class="topbar-icon-btn" title="Notifications">
+          🔔
+          <div class="notif-badge">3</div>
+        </div>
+        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+          <div class="profile-avatar">AD</div>
+          <span class="profile-name">Admin</span>
+          <span class="profile-arrow">▾</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">✎ Edit Challenges</div>
+          <div class="page-subtitle">
+            // SELECT A CHALLENGE TO MODIFY ITS PARAMETERS
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px">
+          <a
+            href="{{ url_for('admin.add_challenge') }}"
+            class="back-btn"
+            style="border-color: rgba(0, 230, 118, 0.3); color: var(--green)"
+            >⊕ New</a
+          >
+          <a href="{{ url_for('admin.admin_dashboard') }}" class="back-btn">← Dashboard</a>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- CHALLENGE LIST -->
+        <div class="panel">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              All Challenges
+            </div>
+            <span
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 10px;
+                color: var(--muted);
+              "
+              id="chalCount"
+              >52</span
+            >
+          </div>
+          <div class="panel-body">
+            <div class="chal-search">
+              <input
+                id="chalSearch"
+                placeholder="Search challenges..."
+                oninput="filterChals()"
+              />
+            </div>
+            <div class="chal-list" id="chalList"></div>
+          </div>
+        </div>
+
+        <!-- EDIT FORM -->
+        <div class="edit-panel" id="editPanel">
+          <div class="panel" style="height: 100%">
+            <div class="anim-bar"></div>
+            <div class="panel-head" id="editHead">
+              <div class="panel-title">
+                <div class="panel-dot"></div>
+                Select a Challenge
+              </div>
+            </div>
+            <div id="emptyState">
+              <div class="empty-state">
+                <div class="empty-icon">✎</div>
+                <div class="empty-text">
+                  Click any challenge<br />to edit its details
+                </div>
+              </div>
+            </div>
+            <div id="editForm" style="display: none">
+              <div class="form-section">
+                <div class="section-label">Basic Info</div>
+                <div class="form-row2">
+                  <div class="form-group">
+                    <label class="form-label">Name</label
+                    ><input class="form-input" id="eName" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Points</label
+                    ><input class="form-input" id="ePoints" type="number" />
+                  </div>
+                </div>
+                <div class="form-row2">
+                  <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="eCat">
+                      <option>Web</option>
+                      <option>Pwn</option>
+                      <option>Crypto</option>
+                      <option>Forensics</option>
+                      <option>Reversing</option>
+                      <option>Misc</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Difficulty</label>
+                    <select class="form-select" id="eDiff">
+                      <option>Easy</option>
+                      <option>Medium</option>
+                      <option>Hard</option>
+                      <option>Insane</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-textarea" id="eDesc"></textarea>
+                </div>
+                <div class="form-group">
+                  <div class="form-label">Hints</div>
+                  <div id="eHintList">
+                    <!-- Hints populated dynamically -->
+                  </div>
+                  <button type="button" class="add-hint-btn" onclick="addEditHint()" style="background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 8px; width: 100%; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.2s;">+ ADD HINT</button>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Attachments / Files</label>
+                  <input type="file" id="eFileInput" style="display:none">
+                  <div class="file-drop" id="eFileDrop">
+                    <div class="file-drop-icon">📎</div>
+                    <div class="file-drop-text">Drop files here or <span>browse</span></div>
+                    <div class="file-drop-text" style="font-size:10px;margin-top:4px">ZIP, ELF, PCAP, PNG — max 50MB</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">File URL / Download Link</label
+                  ><input class="form-input" id="eFileUrl" placeholder="e.g. https://supabase.co/storage/v1/object/public/challenges/binary_crack.zip" />
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="section-label">Flag & Security</div>
+                <div class="form-group">
+                  <label class="form-label">Flag</label
+                  ><input
+                    class="form-input"
+                    id="eFlag"
+                    type="password"
+                    placeholder="FLAG{...}"
+                  />
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="section-label">Statistics (read-only)</div>
+                <div class="form-row2">
+                  <div>
+                    <div class="form-label">Solves</div>
+                    <div
+                      style="
+                        font-family: &quot;Orbitron&quot;, monospace;
+                        font-size: 20px;
+                        font-weight: 900;
+                        color: var(--accent);
+                      "
+                      id="eSolves"
+                    >
+                      —
+                    </div>
+                    <div class="solve-bar">
+                      <div
+                        class="solve-fill"
+                        id="eSolveBar"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="form-label">Attempts</div>
+                    <div
+                      style="
+                        font-family: &quot;Orbitron&quot;, monospace;
+                        font-size: 20px;
+                        font-weight: 900;
+                        color: var(--muted);
+                      "
+                      id="eAttemptStat"
+                    >
+                      —
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="section-label">Visibility</div>
+                <div class="visibility-row">
+                  <div class="vis-btn sel" onclick="selectVis(this)">
+                    VISIBLE
+                  </div>
+                  <div class="vis-btn" onclick="selectVis(this)">HIDDEN</div>
+                  <div class="vis-btn" onclick="selectVis(this)">
+                    ADMIN ONLY
+                  </div>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="btn-cancel" onclick="clearEdit()">CANCEL</button>
+                <button class="btn-save" onclick="saveEdit()">
+                  ✓ SAVE CHANGES
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toast" id="toast">✓ Challenge updated</div>
+
+    <script>
+      let challenges = [];
+      let filtered = [];
+      let selectedChal = null;
+
+      function loadChallenges() {
+        fetch('/api/admin/challenges')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              challenges = data.challenges;
+              filtered = [...challenges];
+              renderList(filtered);
+              if (selectedChal) {
+                const updated = challenges.find(c => c.id === selectedChal.id);
+                if (updated) {
+                  selectChal(updated.id);
+                } else {
+                  clearEdit();
+                }
+              }
+            }
+          });
+      }
+      loadChallenges();
+
+      function diffColor(d) {
+        return d === "Easy"
+          ? "d-easy"
+          : d === "Medium"
+            ? "d-med"
+            : d === "Hard"
+              ? "d-hard"
+              : "d-insane";
+      }
+
+      function renderList(data) {
+        document.getElementById("chalList").innerHTML = data
+          .map(
+            (c) => `
+    <div class="chal-item ${selectedChal && selectedChal.id === c.id ? "active" : ""}" onclick="selectChal(${c.id})">
+      <span class="chal-cat-icon">${c.icon}</span>
+      <div class="chal-info">
+        <div class="chal-name">${c.name}</div>
+        <div class="chal-meta">${c.cat} · ${c.solves} solves</div>
+      </div>
+      <div class="diff-dot ${diffColor(c.diff)}"></div>
+      <div class="chal-pts">${c.pts}</div>
+    </div>`,
+          )
+          .join("");
+        document.getElementById("chalCount").textContent = data.length;
+      }
+
+      function selectChal(id) {
+        selectedChal = challenges.find((c) => c.id === id);
+        document.getElementById("emptyState").style.display = "none";
+        document.getElementById("editForm").style.display = "block";
+        document
+          .getElementById("editHead")
+          .querySelector(".panel-title").innerHTML =
+          `<div class="panel-dot"></div>Editing: ${selectedChal.name}`;
+        document.getElementById("eName").value = selectedChal.name;
+        document.getElementById("ePoints").value = selectedChal.pts;
+        document.getElementById("eCat").value = selectedChal.cat;
+        document.getElementById("eDiff").value = selectedChal.diff;
+        document.getElementById("eDesc").value = selectedChal.desc;
+        document.getElementById("eFileUrl").value = selectedChal.file_url || '';
+        document.getElementById("eFlag").value = selectedChal.flag;
+        
+        // Populate hints
+        const eHintList = document.getElementById("eHintList");
+        eHintList.innerHTML = '';
+        if (selectedChal.hints && selectedChal.hints.length > 0) {
+            selectedChal.hints.forEach((h, idx) => {
+                const div = document.createElement('div');
+                div.className = 'hint-item';
+                div.style.display = 'flex';
+                div.style.gap = '10px';
+                div.style.alignItems = 'center';
+                div.style.marginBottom = '10px';
+                div.innerHTML = `<span class="hint-num" style="min-width: 30px;">H${idx + 1}</span>
+                                 <input class="form-input e-hint-input" value="${h.text}" placeholder="Hint text..." style="flex: 1;">
+                                 <input class="form-input e-hint-cost" type="number" value="${h.cost}" placeholder="Cost" style="width: 120px;">`;
+                eHintList.appendChild(div);
+            });
+        }
+        
+        document.getElementById("eSolves").textContent = selectedChal.solves;
+        if (window.innerWidth <= 900) {
+          document.getElementById("editForm").scrollIntoView({ behavior: 'smooth' });
+        }
+        document.getElementById("eAttemptStat").textContent =
+          selectedChal.attempts;
+        const pct = Math.round(
+          (selectedChal.solves / selectedChal.attempts) * 100,
+        );
+        document.getElementById("eSolveBar").style.width = pct + "%";
+        
+        // Reset file dropzone UI
+        const fileDrop = document.getElementById('eFileDrop');
+        if (fileDrop) {
+          fileDrop.className = 'file-drop';
+          fileDrop.querySelector('.file-drop-icon').textContent = '📎';
+          fileDrop.querySelector('.file-drop-text').innerHTML = 'Drop files here or <span>browse</span>';
+        }
+        const fileInput = document.getElementById('eFileInput');
+        if (fileInput) fileInput.value = '';
+        
+        filterChals();
+      }
+
+      function filterChals() {
+        const q = document.getElementById("chalSearch").value.toLowerCase();
+        filtered = challenges.filter(
+          (c) =>
+            c.name.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q),
+        );
+        renderList(filtered);
+      }
+
+      function clearEdit() {
+        selectedChal = null;
+        document.getElementById("emptyState").style.display = "flex";
+        document.getElementById("editForm").style.display = "none";
+        document.getElementById("eHintList").innerHTML = '';
+        document
+          .getElementById("editHead")
+          .querySelector(".panel-title").innerHTML =
+          '<div class="panel-dot"></div>Select a Challenge';
+        renderList(filtered);
+      }
+      
+      function addEditHint() {
+          const list = document.getElementById('eHintList');
+          const count = list.children.length + 1;
+          const div = document.createElement('div');
+          div.className = 'hint-item';
+          div.style.display = 'flex';
+          div.style.gap = '10px';
+          div.style.alignItems = 'center';
+          div.style.marginBottom = '10px';
+          div.innerHTML = `<span class="hint-num" style="min-width: 30px;">H${count}</span>
+                           <input class="form-input e-hint-input" placeholder="Hint text..." style="flex: 1;">
+                           <input class="form-input e-hint-cost" type="number" placeholder="Cost" style="width: 120px;">`;
+          list.appendChild(div);
+      }
+
+      function saveEdit() {
+        if (!selectedChal) return;
+        const name = document.getElementById("eName").value.trim();
+        const pts = +document.getElementById("ePoints").value;
+        const cat = document.getElementById("eCat").value;
+        const diff = document.getElementById("eDiff").value;
+        const desc = document.getElementById("eDesc").value.trim();
+        const flag = document.getElementById("eFlag").value.trim();
+        const file_url = document.getElementById("eFileUrl").value.trim() || null;
+        
+        const hints = [];
+        document.querySelectorAll('#eHintList .hint-item').forEach(item => {
+            const text = item.querySelector('.e-hint-input').value.trim();
+            const cost = item.querySelector('.e-hint-cost').value.trim() || 0;
+            if (text) {
+                hints.push({ text: text, cost: parseInt(cost) });
+            }
+        });
+        
+        fetch(`/api/admin/challenges/edit/${selectedChal.id}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            title: name,
+            points: pts,
+            category: cat,
+            difficulty: diff,
+            description: desc,
+            flag: flag,
+            file_url: file_url,
+            hints: hints
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showToast('✓ "' + name + '" updated');
+            loadChallenges();
+          } else {
+            alert("Error: " + data.message);
+          }
+        });
+      }
+
+      function selectVis(el) {
+        document
+          .querySelectorAll(".vis-btn")
+          .forEach((b) => b.classList.remove("sel"));
+        el.classList.add("sel");
+      }
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      renderList(challenges);
+
+      const pC = document.getElementById("particles");
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.bottom = "-10px";
+        p.style.animationDuration = 7 + Math.random() * 14 + "s";
+        p.style.animationDelay = Math.random() * 12 + "s";
+        const sz = Math.random() > 0.6 ? 3 : 2;
+        p.style.width = p.style.height = sz + "px";
+        p.style.background =
+          Math.random() > 0.5 ? "var(--primary)" : "var(--accent)";
+        pC.appendChild(p);
+      }
+      const cO = document.getElementById("cursor-outer"),
+        cI = document.getElementById("cursor-inner");
+      let mX = 0,
+        mY = 0,
+        oX = 0,
+        oY = 0,
+        inInput = false;
+      document.addEventListener("mousemove", (e) => {
+        mX = e.clientX;
+        mY = e.clientY;
+        if (!inInput) {
+          cI.style.left = mX + "px";
+          cI.style.top = mY + "px";
+        }
+        requestAnimationFrame(() => {
+          oX += (mX - oX) * 0.25;
+          oY += (mY - oY) * 0.25;
+          if (!inInput) {
+            cO.style.left = oX + "px";
+            cO.style.top = oY + "px";
+          }
+        });
+        if (!inInput) {
+          const p = document.createElement("div");
+          p.className = "trail-particle";
+          p.style.left = mX + "px";
+          p.style.top = mY + "px";
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 600);
+        }
+      });
+      document
+        .querySelectorAll("a,button,.chal-item,.vis-btn,.topbar-icon-btn")
+        .forEach((el) => {
+          el.addEventListener("mouseenter", () =>
+            document.body.classList.add("cursor-hover"),
+          );
+          el.addEventListener("mouseleave", () =>
+            document.body.classList.remove("cursor-hover"),
+          );
+        });
+      document
+        .querySelectorAll(".form-input,.form-textarea,.form-select")
+        .forEach((inp) => {
+          inp.style.cursor = "text";
+          inp.addEventListener("mouseenter", () => {
+            inInput = true;
+            cO.style.opacity = "0";
+            cI.style.opacity = "0";
+          });
+          inp.addEventListener("mouseleave", () => {
+            inInput = false;
+            cO.style.opacity = "1";
+            cI.style.opacity = "1";
+          });
+        });
+      document.addEventListener("click", (e) => {
+        for (let i = 0; i < 6; i++) {
+          const s = document.createElement("div");
+          s.className = "click-spark";
+          const a = (i / 6) * Math.PI * 2;
+          s.style.setProperty("--tx", Math.cos(a) * 20 + "px");
+          s.style.setProperty("--ty", Math.sin(a) * 20 + "px");
+          s.style.left = e.clientX + "px";
+          s.style.top = e.clientY + "px";
+          document.body.appendChild(s);
+          setTimeout(() => s.remove(), 500);
+      // File Upload Logic for Edit panel
+      document.addEventListener('DOMContentLoaded', () => {
+        const fileDrop = document.getElementById('eFileDrop');
+        const fileInput = document.getElementById('eFileInput');
+        const fileUrlInput = document.getElementById('eFileUrl');
+        
+        if (fileDrop && fileInput) {
+          fileDrop.addEventListener('click', () => {
+            fileInput.click();
+          });
+          
+          ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileDrop.addEventListener(eventName, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }, false);
+          });
+          
+          ['dragenter', 'dragover'].forEach(eventName => {
+            fileDrop.addEventListener(eventName, () => {
+              fileDrop.classList.add('dragover');
+            }, false);
+          });
+          
+          ['dragleave', 'drop'].forEach(eventName => {
+            fileDrop.addEventListener(eventName, () => {
+              fileDrop.classList.remove('dragover');
+            }, false);
+          });
+          
+          fileDrop.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+              uploadFile(files[0]);
+            }
+          });
+          
+          fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+              uploadFile(fileInput.files[0]);
+            }
+          });
+          
+          function uploadFile(file) {
+            if (file.size > 50 * 1024 * 1024) {
+              showUploadError("File exceeds 50MB limit.");
+              return;
+            }
+            
+            fileDrop.className = 'file-drop uploading';
+            fileDrop.querySelector('.file-drop-icon').textContent = '⏳';
+            fileDrop.querySelector('.file-drop-text').innerHTML = `Uploading <span>${file.name}</span>...`;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/api/admin/upload', {
+              method: 'POST',
+              body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                fileDrop.className = 'file-drop success';
+                fileDrop.querySelector('.file-drop-icon').textContent = '✅';
+                fileDrop.querySelector('.file-drop-text').innerHTML = `Uploaded <span>${data.filename}</span> successfully!`;
+                fileUrlInput.value = data.file_url;
+                showToast('✓ File uploaded successfully!');
+              } else {
+                showUploadError(data.message || "Upload failed.");
+              }
+            })
+            .catch(err => {
+              showUploadError("Network error during upload.");
+            });
+          }
+          
+          function showUploadError(msg) {
+            fileDrop.className = 'file-drop error';
+            fileDrop.querySelector('.file-drop-icon').textContent = '❌';
+            fileDrop.querySelector('.file-drop-text').innerHTML = `Error: <span>${msg}</span> (Click to try again)`;
+            showToast('✗ ' + msg);
+          }
+        }
+      });
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

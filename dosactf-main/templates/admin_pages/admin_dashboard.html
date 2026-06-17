@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DosaCTF — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+<div id="cursor-sword" style="display: none !important;"></div>
+<div class="particles" id="particles"></div>
+
+<!-- ══════════ TOPBAR ══════════ -->
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="#" style="display: flex; align-items: center; text-decoration: none; gap: 10px;">
+      <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 6px;">
+      <span class="topbar-brand">DosaCTF</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-page">Admin Dashboard</span>
+  </div>
+        <div class="topbar-right">
+        <div class="topbar-icon-btn" title="Notifications">
+          🔔
+          <div class="notif-badge">3</div>
+        </div>
+        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+          <div class="profile-avatar">AD</div>
+          <span class="profile-name">Admin</span>
+          <span class="profile-arrow">▾</span>
+        </a>
+      </div>
+</nav>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main-content">
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="anim-bar"></div>
+      <div class="corner-tl"></div>
+      <div class="stat-card-icon">👤</div>
+      <div class="stat-card-body">
+        <div class="stat-card-label">Total Users</div>
+        <div class="stat-card-value" id="stat-total-users">0</div>
+        <div class="stat-card-sub">▲ Live data from DB</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="anim-bar"></div>
+      <div class="corner-tl"></div>
+      <div class="stat-card-icon">⚐</div>
+      <div class="stat-card-body">
+        <div class="stat-card-label">Total Challenges</div>
+        <div class="stat-card-value" id="stat-total-challenges">0</div>
+        <div class="stat-card-sub">▲ Live data from DB</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="anim-bar"></div>
+      <div class="corner-tl"></div>
+      <div class="stat-card-icon">🏆</div>
+      <div class="stat-card-body">
+        <div class="stat-card-label">Total Score</div>
+        <div class="stat-card-value" id="stat-total-score">0</div>
+        <div class="stat-card-sub">▲ Combined player scores</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="anim-bar"></div>
+      <div class="corner-tl"></div>
+      <div class="stat-card-icon">📡</div>
+      <div class="stat-card-body">
+        <div class="stat-card-label">Total Captured Flags</div>
+        <div class="stat-card-value" id="stat-total-solves">0</div>
+        <div class="stat-card-sub">▲ Total correct flags submitted</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MID ROW: Manage Users | Manage Challenges | Leaderboard -->
+  <div class="mid-row">
+
+    <!-- Manage Users -->
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Manage Users</div>
+      </div>
+      <div class="panel-body">
+        <ul class="manage-list">
+          <li onclick="window.location.href='{{ url_for('admin.view_users') }}'">
+            View Users List
+          </li>
+          <li onclick="window.location.href='{{ url_for('admin.edit_user_role') }}'">
+            Edit User Roles
+          </li>
+          <li onclick="window.location.href='{{ url_for('admin.ban_users') }}'">
+            Ban Users
+          </li>
+          <li onclick="window.location.href='{{ url_for('admin.admin_notify') }}'">
+            Send Notification
+          </li>
+        </ul>
+        <button class="btn-panel" onclick="window.location.href='{{ url_for('admin.view_users') }}'">Manage Users</button>
+      </div>
+    </div>
+
+    <!-- Manage Challenges -->
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Manage Challenges</div>
+      </div>
+      <div class="panel-body">
+        <ul class="manage-list">
+          <li onclick="window.location.href='{{ url_for('admin.add_challenge') }}'">
+            Add New Challenge
+          </li>
+          <li onclick="window.location.href='{{ url_for('admin.edit_challenges') }}'">
+            Edit Challenges
+          </li>
+          <li onclick="window.location.href='{{ url_for('admin.remove_challenges') }}'">
+            Remove Challenges
+          </li>
+        </ul>
+        <button class="btn-panel" onclick="window.location.href='{{ url_for('admin.edit_challenges') }}'">Manage Challenges</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Leaderboard</div>
+      </div>
+      <div class="panel-body">
+        <ul class="lb-list" id="admin-lb-list">
+          <!-- Rendered dynamically -->
+        </ul>
+        <button class="btn-panel" onclick="window.location.href='{{ url_for('admin.admin_leaderboard') }}'">View Leaderboard</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ROW: Flag Submissions | Admin Logs -->
+  <div class="bot-row">
+
+    <!-- Recent Flag Submissions -->
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Recent Flag Submissions</div>
+        <span class="live-badge">
+          <span class="live-dot"></span>LIVE
+        </span>
+      </div>
+        <ul class="sub-list" id="sub-list">
+          {% if recent_solves %}
+            {% for s in recent_solves %}
+              <li class="sub-item">
+                <span class="sub-time">{{ s.solved_at.strftime('%H:%M') if s.solved_at else '' }}</span>
+                <span class="sub-sep"></span>
+                <span class="sub-user">{{ s.username }}</span>
+                <span class="sub-status correct">Solved: {{ s.title }}</span>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="sub-item"><span style="color:var(--muted)">No recent solves</span></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Admin Logs -->
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Admin Logs</div>
+        <span class="srv-badge">SRV-04</span>
+      </div>
+      <div class="panel-body">
+        <div class="log-list" id="log-list">
+          {% if admin_logs %}
+            {% for log in admin_logs %}
+              <div class="log-entry {% if 'Banned' in log.action %}warn{% else %}info{% endif %}">
+                <span class="log-time">{{ log.created_at.strftime('%H:%M') if log.created_at else '' }}</span>
+                {{ log.action }}: <span class="log-highlight">"{{ log.target }}"</span>
+                <span style="color:var(--muted); font-size:10px; margin-left:5px">by {{ log.username }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="log-entry info"><span style="color:var(--muted)">No recent logs</span></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /main-content -->
+
+<script src="/static/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    function updateStats() {
+        fetch('/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('stat-total-users').textContent = data.total_users.toLocaleString();
+                    document.getElementById('stat-total-challenges').textContent = data.total_challenges.toLocaleString();
+                    document.getElementById('stat-total-score').textContent = data.total_score.toLocaleString();
+                    document.getElementById('stat-total-solves').textContent = data.total_solves.toLocaleString();
+                }
+            })
+            .catch(err => console.error("Error fetching admin stats:", err));
+    }
+
+    function updateLeaderboard() {
+        fetch('/api/leaderboard')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const lbList = document.getElementById('admin-lb-list');
+                    if (data.leaderboard.length === 0) {
+                        lbList.innerHTML = `<li style="padding: 15px; text-align: center; color: var(--muted);">No players registered yet</li>`;
+                    } else {
+                        lbList.innerHTML = data.leaderboard.slice(0, 3).map((user, index) => {
+                            const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze';
+                            return `
+                              <li class="lb-item">
+                                <span class="lb-rank ${rankClass}">${index + 1}.</span>
+                                <div class="lb-avatar">${user.avatar}</div>
+                                <span class="lb-name">${user.username}</span>
+                                <span class="lb-pts">${user.score.toLocaleString()}<span>pts</span></span>
+                              </li>
+                            `;
+                        }).join('');
+                    }
+                }
+            })
+            .catch(err => console.error("Error fetching admin leaderboard:", err));
+    }
+
+    function updateSubmissions() {
+        fetch('/api/admin/recent-submissions')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const subList = document.getElementById('sub-list');
+                    if (data.submissions.length === 0) {
+                        subList.innerHTML = `<li style="padding: 15px; text-align: center; color: var(--muted);">No flag submissions yet</li>`;
+                    } else {
+                        subList.innerHTML = data.submissions.map(sub => `
+                          <li class="sub-item">
+                            <span class="sub-time">${sub.time}</span>
+                            <span class="sub-sep"></span>
+                            <span class="sub-user">${sub.user}</span>
+                            <span class="sub-challenge" style="color:var(--muted);font-size:11px;margin-right:8px">// ${sub.challenge}</span>
+                            <span class="sub-status correct">${sub.status}</span>
+                          </li>
+                        `).join('');
+                    }
+                }
+            })
+            .catch(err => console.error("Error fetching submissions:", err));
+    }
+
+    function updateLogs() {
+        fetch('/api/admin/logs')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const logList = document.getElementById('log-list');
+                    if (data.logs.length === 0) {
+                        logList.innerHTML = `<div style="padding: 15px; text-align: center; color: var(--muted);">No admin logs recorded yet</div>`;
+                    } else {
+                        logList.innerHTML = data.logs.map(log => {
+                            let typeClass = 'info';
+                            const act = log.action.toLowerCase();
+                            if (act.includes('change') || act.includes('status') || act.includes('role')) {
+                                typeClass = 'warn';
+                            } else if (act.includes('created') || act.includes('delete') || act.includes('deleted')) {
+                                typeClass = 'ok';
+                            }
+                            return `
+                              <div class="log-entry ${typeClass}">
+                                <span class="log-time">${log.time}</span>
+                                <span class="log-admin" style="color:var(--primary);font-weight:600;margin-right:4px">${log.admin}</span>
+                                ${log.action}: <span class="log-highlight">"${log.target}"</span>
+                              </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            })
+            .catch(err => console.error("Error fetching admin logs:", err));
+    }
+
+    // Initial load
+    updateStats();
+    updateLeaderboard();
+    updateSubmissions();
+    updateLogs();
+
+    // Poll every 3 seconds for real-time updates
+    setInterval(updateStats, 3000);
+    setInterval(updateLeaderboard, 3000);
+    setInterval(updateSubmissions, 3000);
+    setInterval(updateLogs, 3000);
+});
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

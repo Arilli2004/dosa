@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dosa CTF — Privacy Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  .rules-container { max-width: 800px; margin: 100px auto; padding: 40px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); border-radius: 8px; }
+  .rules-container h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .rules-container h3 { color: var(--accent); margin-top: 20px; }
+  .rules-container ul, .rules-container p { line-height: 1.8; color: var(--text); }
+</style>
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" class="logo-img" style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px;">
+    <span class="logo-text">Dosa CTF</span>
+  </a>
+  <div class="nav-actions">
+    <a href="/login" class="btn-ghost">Login</a>
+    <a href="/register" class="btn-primary">Register</a>
+  </div>
+</nav>
+
+<div class="rules-container">
+  <h1>Privacy Protocol</h1>
+  <p>Your privacy and data security are of utmost importance to the DOSA CTF Administration. Please review our privacy practices below:</p>
+  
+  <h3>1. Information Collection</h3>
+  <ul>
+    <li>We collect your Callsign (Username) and Email address during registration.</li>
+    <li>We log IP addresses, login timestamps, and platform actions for security and auditing purposes.</li>
+  </ul>
+  
+  <h3>2. Data Usage</h3>
+  <ul>
+    <li>Your data is solely used to manage your account, calculate your ranking on the leaderboard, and prevent fraudulent activity.</li>
+    <li>We do not sell or share your personal information with third parties.</li>
+  </ul>
+  
+  <h3>3. Security Measures</h3>
+  <ul>
+    <li>Passwords are securely hashed using modern cryptographic algorithms.</li>
+    <li>Our platform employs encryption and strict access controls to protect your data.</li>
+  </ul>
+  
+  <h3>4. Account Deletion</h3>
+  <ul>
+    <li>You may request account deletion by contacting the CTF Administrators. Note that deleted accounts will have their scores preserved anonymously to maintain leaderboard integrity.</li>
+  </ul>
+  
+  <p style="margin-top: 40px; font-style: italic;">By participating in DOSA CTF, you consent to this Privacy Protocol.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

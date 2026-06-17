@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dosa CTF — Rules of Engagement</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  .rules-container { max-width: 800px; margin: 100px auto; padding: 40px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); border-radius: 8px; }
+  .rules-container h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .rules-container h3 { color: var(--accent); margin-top: 20px; }
+  .rules-container ul { line-height: 1.8; color: var(--text); }
+</style>
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" class="logo-img" style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px;">
+    <span class="logo-text">Dosa CTF</span>
+  </a>
+  <div class="nav-actions">
+    <a href="/login" class="btn-ghost">Login</a>
+    <a href="/register" class="btn-primary">Register</a>
+  </div>
+</nav>
+
+<div class="rules-container">
+  <h1>Rules of Engagement</h1>
+  <p>Welcome to DOSA CTF. To ensure a fair and competitive environment for all operatives, please adhere to the following rules:</p>
+  
+  <h3>1. Authorized Targets Only</h3>
+  <ul>
+    <li>Only attack the infrastructure and IP addresses specifically provided within the challenge descriptions.</li>
+    <li>Do not attack the CTF platform itself, other teams, or external infrastructure.</li>
+  </ul>
+  
+  <h3>2. No Flag Sharing</h3>
+  <ul>
+    <li>Sharing flags, writeups, or solutions before the CTF concludes is strictly prohibited.</li>
+    <li>Collaboration is only allowed within your registered team (if applicable).</li>
+  </ul>
+  
+  <h3>3. Denial of Service (DoS)</h3>
+  <ul>
+    <li>Do not perform any Denial of Service (DoS) or Distributed Denial of Service (DDoS) attacks against any infrastructure.</li>
+    <li>Automated scanning tools (e.g., DirBuster, SQLMap) are allowed only on challenge infrastructure, but please throttle your requests to avoid disruption.</li>
+  </ul>
+  
+  <h3>4. Reporting Issues</h3>
+  <ul>
+    <li>If you discover a bug or vulnerability in the CTF platform itself, please report it to the admins immediately. Do not exploit it.</li>
+  </ul>
+  
+  <h3>5. Conduct</h3>
+  <ul>
+    <li>Maintain professional and respectful conduct in all communications. Harassment or abuse will result in an immediate ban.</li>
+  </ul>
+  
+  <p style="margin-top: 40px; font-weight: bold; color: var(--primary);">Failure to comply with these rules will result in immediate disqualification and account ban.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

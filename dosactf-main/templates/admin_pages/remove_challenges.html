@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlagHunt CTF — Remove Challenges</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --bg2: #111111;
+        --bg3: #181818;
+        --primary: #D9A441;
+        --secondary: #8B5E34;
+        --text: #F5E6C8;
+        --accent: #FF7A30;
+        --muted: rgba(245, 230, 200, 0.45);
+        --border: rgba(217, 164, 65, 0.22);
+        --border2: rgba(245, 230, 200, 0.08);
+        --glow: 0 0 28px rgba(217, 164, 65, 0.45);
+        --glow-sm: 0 0 10px rgba(217, 164, 65, 0.3);
+        --green: #00e676;
+        --amber: #ffb300;
+        --blue: #3b8bff;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: "Rajdhani", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+        /* cursor none removed */
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          rgba(0, 0, 0, 0.07) 2px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        pointer-events: none;
+        z-index: 9998;
+      }
+      #cursor-outer {
+        position: fixed;
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: screen;
+        background: rgba(255, 59, 59, 0.03);
+        box-shadow: 0 0 12px rgba(255, 59, 59, 0.3);
+        left: -100px;
+        top: -100px;
+        transition:
+          width 0.25s,
+          height 0.25s,
+          border-color 0.2s;
+      }
+      #cursor-inner {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 16px var(--primary);
+        left: -100px;
+        top: -100px;
+      }
+      body.cursor-hover #cursor-outer {
+        width: 56px;
+        height: 56px;
+        border-color: var(--accent);
+        background: rgba(255, 59, 59, 0.15);
+        box-shadow: 0 0 28px rgba(255, 59, 59, 0.6);
+      }
+      .trail-particle {
+        position: fixed;
+        width: 5px;
+        height: 5px;
+        background: radial-gradient(circle, var(--accent), var(--primary));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99997;
+        transform: translate(-50%, -50%);
+        animation: trailFade 0.6s ease-out forwards;
+      }
+      @keyframes trailFade {
+        0% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.1);
+        }
+      }
+      .click-spark {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99996;
+        transform: translate(-50%, -50%);
+        animation: sparkBurst 0.5s ease-out forwards;
+      }
+      @keyframes sparkBurst {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(
+              calc(-50% + var(--tx, 0px) * 2),
+              calc(-50% + var(--ty, 0px) * 2)
+            )
+            scale(0);
+        }
+      }
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .particle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0;
+        animation: float-up linear infinite;
+      }
+      @keyframes float-up {
+        0% {
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-100vh);
+        }
+      }
+      @keyframes bar-slide {
+        0% {
+          background-position: 0%;
+        }
+        100% {
+          background-position: 200%;
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes hex-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(255, 59, 59, 0);
+        }
+      }
+      @keyframes deletePulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(255, 59, 59, 0);
+        }
+      }
+      @keyframes rowDelete {
+        to {
+          opacity: 0;
+          transform: translateX(40px);
+          max-height: 0;
+          padding: 0;
+          border: none;
+        }
+      }
+      .anim-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--secondary),
+          var(--primary),
+          var(--accent),
+          var(--primary),
+          var(--secondary)
+        );
+        background-size: 200% 100%;
+        animation: bar-slide 3s linear infinite;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 500;
+        height: 58px;
+        background: rgba(10, 10, 10, 0.95);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(14px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo-hex {
+        width: 30px;
+        height: 30px;
+        background: var(--primary);
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        animation: hex-pulse 2.5s ease-in-out infinite;
+      }
+      .topbar-brand {
+        font-family: "Orbitron", monospace;
+        font-weight: 900;
+        font-size: 16px;
+        color: var(--primary);
+        text-shadow: var(--glow-sm);
+        text-decoration: none;
+        /* cursor none removed */
+      }
+      .topbar-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--border);
+      }
+      .topbar-page {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .topbar-icon-btn {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border2);
+        background: var(--bg2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .topbar-icon-btn:hover {
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.08);
+      }
+      .notif-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary);
+        font-size: 8px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .topbar-profile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        padding: 4px 12px 4px 6px;
+        /* cursor none removed */
+        transition: border-color 0.2s;
+      }
+      .topbar-profile:hover {
+        border-color: var(--primary);
+      }
+      .profile-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+      }
+      .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        color: var(--muted);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        text-decoration: none;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .back-btn:hover {
+        border-color: var(--primary);
+        color: var(--text);
+      }
+      .main-content {
+        padding: 28px 32px 48px;
+        position: relative;
+        z-index: 1;
+      }
+      .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-title {
+        font-family: "Orbitron", monospace;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: var(--glow-sm);
+      }
+      .page-subtitle {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 1px;
+        margin-top: 6px;
+      }
+      .page-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      /* WARNING BANNER */
+      .warn-banner {
+        background: rgba(255, 59, 59, 0.07);
+        border: 1px solid rgba(255, 59, 59, 0.4);
+        padding: 14px 20px;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        animation: deletePulse 2.5s ease-in-out infinite;
+      }
+      .warn-icon {
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+      .warn-text {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        line-height: 1.7;
+      }
+      /* FILTER & BULK */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
+      }
+      .search-wrap::before {
+        content: "⌕";
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        font-size: 16px;
+        pointer-events: none;
+      }
+      .search-input {
+        width: 100%;
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 12px 9px 36px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .search-input:focus {
+        border-color: var(--primary);
+      }
+      .search-input::placeholder {
+        color: var(--muted);
+      }
+      .filter-select {
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 14px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        outline: none;
+        /* cursor none removed */
+        transition: border-color 0.2s;
+      }
+      .filter-select:focus {
+        border-color: var(--primary);
+      }
+      .bulk-del-btn {
+        background: rgba(255, 59, 59, 0.1);
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        padding: 9px 18px;
+        font-family: "Orbitron", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        /* cursor none removed */
+        transition: all 0.2s;
+      }
+      .bulk-del-btn:hover {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: var(--glow-sm);
+      }
+      .bulk-del-btn:disabled {
+        opacity: 0.35;
+        pointer-events: none;
+      }
+      .selected-count {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .selected-count span {
+        color: var(--primary);
+        font-weight: 700;
+      }
+      /* TABLE */
+      .table-wrap {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease both;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead th {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        font-weight: 400;
+      }
+      .th-check {
+        width: 40px;
+      }
+      tbody tr {
+        border-bottom: 1px solid var(--border2);
+        transition:
+          background 0.18s,
+          opacity 0.3s,
+          transform 0.3s;
+      }
+      tbody tr:hover {
+        background: rgba(255, 59, 59, 0.04);
+      }
+      tbody tr.checked {
+        background: rgba(255, 59, 59, 0.08);
+      }
+      tbody tr.deleting {
+        animation: rowDelete 0.4s ease forwards;
+      }
+      td {
+        padding: 12px 16px;
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        /* cursor none removed */
+      }
+      .chal-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .chal-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .chal-name {
+        font-weight: 600;
+      }
+      .chal-id {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .cat-badge {
+        display: inline-flex;
+        padding: 3px 8px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        border: 1px solid var(--border2);
+        color: var(--muted);
+      }
+      .diff-chip {
+        display: inline-flex;
+        padding: 2px 8px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        border-radius: 1px;
+        border: 1px solid;
+      }
+      .d-easy {
+        color: var(--green);
+        border-color: var(--green);
+        background: rgba(0, 230, 118, 0.08);
+      }
+      .d-med {
+        color: var(--amber);
+        border-color: var(--amber);
+        background: rgba(255, 179, 0, 0.08);
+      }
+      .d-hard {
+        color: var(--primary);
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.08);
+      }
+      .d-insane {
+        color: #a855f7;
+        border-color: #a855f7;
+        background: rgba(168, 85, 247, 0.08);
+      }
+      .pts-val {
+        font-family: "Orbitron", monospace;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .solves-val {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .del-btn {
+        padding: 5px 14px;
+        border: 1px solid var(--primary);
+        background: rgba(255, 59, 59, 0.06);
+        color: var(--primary);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        /* cursor none removed */
+        transition: all 0.2s;
+        letter-spacing: 0.5px;
+      }
+      .del-btn:hover {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: var(--glow-sm);
+      }
+      .panel-footer {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .footer-text {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      /* CONFIRM MODAL */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 9000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+        backdrop-filter: blur(4px);
+      }
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--primary);
+        padding: 32px;
+        max-width: 400px;
+        width: 90%;
+        position: relative;
+        box-shadow:
+          var(--glow),
+          0 32px 80px rgba(0, 0, 0, 0.8);
+      }
+      .modal::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--secondary),
+          var(--primary),
+          var(--accent)
+        );
+        animation: bar-slide 3s linear infinite;
+        background-size: 200% 100%;
+      }
+      .modal-icon {
+        font-size: 36px;
+        margin-bottom: 16px;
+        display: block;
+      }
+      .modal-title {
+        font-family: "Orbitron", monospace;
+        font-size: 16px;
+        font-weight: 900;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+      .modal-text {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 24px;
+      }
+      .modal-target {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .modal-btns {
+        display: flex;
+        gap: 12px;
+      }
+      .btn-confirm-del {
+        flex: 2;
+        background: var(--primary);
+        border: none;
+        color: #fff;
+        padding: 13px;
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        /* cursor none removed */
+        clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+        transition: all 0.22s;
+      }
+      .btn-confirm-del:hover {
+        background: #cc0000;
+        box-shadow: var(--glow);
+      }
+      .btn-modal-cancel {
+        flex: 1;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 13px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        /* cursor none removed */
+        transition: all 0.2s;
+      }
+      .btn-modal-cancel:hover {
+        border-color: var(--primary);
+        color: var(--text);
+      }
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--bg2);
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 12px;
+        padding: 14px 22px;
+        z-index: 9999;
+        transform: translateY(60px);
+        opacity: 0;
+        transition: all 0.35s;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      @media (max-width: 900px) {
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+  <body>
+    <div id="cursor-outer"></div>
+    <div id="cursor-inner"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- CONFIRM MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <span class="modal-icon">🗑️</span>
+        <div class="modal-title">CONFIRM DELETION</div>
+        <div class="modal-text">
+          You are about to permanently remove
+          <span class="modal-target" id="modalTarget">"Challenge Name"</span>
+          from the network. All solve history and submissions will be lost. This
+          action cannot be undone.
+        </div>
+        <div class="modal-btns">
+          <button class="btn-modal-cancel" onclick="closeModal()">
+            CANCEL
+          </button>
+          <button class="btn-confirm-del" onclick="confirmDelete()">
+            🗑 DELETE
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="topbar">
+      <div class="topbar-left">
+        <div class="logo-hex">⚑</div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="topbar-brand">DosaCTF</a>
+        <div class="topbar-divider"></div>
+        <span class="topbar-page">Admin › Remove Challenges</span>
+      </div>
+            <div class="topbar-right">
+        <div class="topbar-icon-btn" title="Notifications">
+          🔔
+          <div class="notif-badge">3</div>
+        </div>
+        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+          <div class="profile-avatar">AD</div>
+          <span class="profile-name">Admin</span>
+          <span class="profile-arrow">▾</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🗑 Remove Challenges</div>
+          <div class="page-subtitle">
+            // PERMANENT DELETION — CANNOT BE UNDONE
+          </div>
+        </div>
+        <div class="page-actions">
+          <a href="{{ url_for('admin.edit_challenges') }}" class="back-btn">✎ Edit</a>
+          <a
+            href="{{ url_for('admin.add_challenge') }}"
+            class="back-btn"
+            style="border-color: rgba(0, 230, 118, 0.3); color: var(--green)"
+            >⊕ Add New</a
+          >
+          <a href="{{ url_for('admin.admin_dashboard') }}" class="back-btn">← Dashboard</a>
+        </div>
+      </div>
+
+      <div class="warn-banner">
+        <div class="warn-icon">⚠</div>
+        <div class="warn-text">
+          Deleted challenges are permanently removed along with all solve data,
+          submissions, and attachments. Ensure you have exported any needed data
+          before proceeding.
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input
+            class="search-input"
+            id="searchInput"
+            placeholder="Search challenges..."
+            oninput="applyFilter()"
+          />
+        </div>
+        <select class="filter-select" id="catFilter" onchange="applyFilter()">
+          <option value="">All Categories</option>
+          <option>Web</option>
+          <option>Pwn</option>
+          <option>Crypto</option>
+          <option>Forensics</option>
+          <option>Reversing</option>
+          <option>Misc</option>
+        </select>
+        <select class="filter-select" id="diffFilter" onchange="applyFilter()">
+          <option value="">All Difficulties</option>
+          <option>Easy</option>
+          <option>Medium</option>
+          <option>Hard</option>
+          <option>Insane</option>
+        </select>
+        <div class="selected-count" id="selCount"><span>0</span> selected</div>
+        <button
+          class="bulk-del-btn"
+          id="bulkDelBtn"
+          disabled
+          onclick="bulkDelete()"
+        >
+          🗑 DELETE SELECTED
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="anim-bar"></div>
+        <table>
+          <thead>
+            <tr>
+              <th class="th-check">
+                <input type="checkbox" id="selectAll" onchange="toggleAll()" />
+              </th>
+              <th>CHALLENGE</th>
+              <th>CATEGORY</th>
+              <th>DIFFICULTY</th>
+              <th>POINTS</th>
+              <th>SOLVES</th>
+              <th>CREATED</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="panel-footer">
+          <div class="footer-text" id="footerText">Showing 8 challenges</div>
+          <div
+            class="footer-text"
+            id="deletedCount"
+            style="color: var(--primary)"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">🗑 Challenge removed</div>
+
+    <script>
+      let challenges = [];
+      let filtered = [];
+      let deletedCount = 0;
+      let deleteTarget = null;
+
+      function loadChallenges() {
+        fetch('/api/admin/challenges')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              challenges = data.challenges.map(c => ({...c, checked: false, created: "2026-01-10"}));
+              filtered = [...challenges];
+              renderTable();
+            }
+          });
+      }
+      loadChallenges();
+
+      function diffClass(d) {
+        return d === "Easy"
+          ? "d-easy"
+          : d === "Medium"
+            ? "d-med"
+            : d === "Hard"
+              ? "d-hard"
+              : "d-insane";
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = filtered
+          .map(
+            (c) => `
+    <tr id="row-${c.id}" class="${c.checked ? "checked" : ""}">
+      <td><input type="checkbox" ${c.checked ? "checked" : ""} onchange="toggleRow(${c.id},this)"></td>
+      <td><div class="chal-cell"><span class="chal-icon">${c.icon}</span><div><div class="chal-name">${c.name}</div><div class="chal-id">#CH-${String(c.id).padStart(3, "0")}</div></div></div></td>
+      <td><span class="cat-badge">${c.cat.toUpperCase()}</span></td>
+      <td><span class="diff-chip ${diffClass(c.diff)}">${c.diff.toUpperCase()}</span></td>
+      <td><span class="pts-val">${c.pts}</span></td>
+      <td><span class="solves-val">${c.solves} solves</span></td>
+      <td><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)">${c.created}</span></td>
+      <td><button class="del-btn" onclick="openModal(${c.id})">🗑 REMOVE</button></td>
+    </tr>`,
+          )
+          .join("");
+        updateBulk();
+        document.getElementById("footerText").textContent =
+          "Showing " + filtered.length + " challenges";
+      }
+
+      function toggleRow(id, cb) {
+        const c = challenges.find((x) => x.id === id);
+        if (c) c.checked = cb.checked;
+        const row = document.getElementById("row-" + id);
+        if (row) row.classList.toggle("checked", cb.checked);
+        updateBulk();
+      }
+
+      function toggleAll() {
+        const all = document.getElementById("selectAll").checked;
+        filtered.forEach((c) => {
+          c.checked = all;
+        });
+        renderTable();
+      }
+
+      function updateBulk() {
+        const n = challenges.filter((c) => c.checked).length;
+        document.getElementById("selCount").innerHTML =
+          `<span>${n}</span> selected`;
+        document.getElementById("bulkDelBtn").disabled = n === 0;
+        document.getElementById("selectAll").checked =
+          filtered.length > 0 && filtered.every((c) => c.checked);
+      }
+
+      function applyFilter() {
+        const q = document.getElementById("searchInput").value.toLowerCase();
+        const cat = document.getElementById("catFilter").value;
+        const diff = document.getElementById("diffFilter").value;
+        filtered = challenges.filter((c) => {
+          const mq =
+            !q ||
+            c.name.toLowerCase().includes(q) ||
+            c.cat.toLowerCase().includes(q);
+          const mc = !cat || c.cat === cat;
+          const md = !diff || c.diff === diff;
+          return mq && mc && md;
+        });
+        renderTable();
+      }
+
+      function openModal(id) {
+        deleteTarget = { id, bulk: false };
+        const c = challenges.find((x) => x.id === id);
+        document.getElementById("modalTarget").textContent = '"' + c.name + '"';
+        document.getElementById("modalOverlay").classList.add("open");
+      }
+
+      function bulkDelete() {
+        const selected = challenges.filter((c) => c.checked);
+        if (!selected.length) return;
+        deleteTarget = { bulk: true, ids: selected.map((c) => c.id) };
+        document.getElementById("modalTarget").textContent =
+          selected.length + " selected challenges";
+        document.getElementById("modalOverlay").classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.remove("open");
+        deleteTarget = null;
+      }
+
+      function confirmDelete() {
+        if (!deleteTarget) return;
+        const ids = deleteTarget.bulk ? deleteTarget.ids : [deleteTarget.id];
+        closeModal();
+        
+        let deletePromises = ids.map(id => {
+          return fetch(`/api/admin/challenges/delete/${id}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                const row = document.getElementById("row-" + id);
+                if (row) {
+                  row.classList.add("deleting");
+                  return new Promise(resolve => {
+                    setTimeout(() => {
+                      challenges = challenges.filter((c) => c.id !== id);
+                      filtered = filtered.filter((c) => c.id !== id);
+                      resolve();
+                    }, 400);
+                  });
+                }
+              } else {
+                alert(`Error deleting challenge ID ${id}: ` + data.message);
+              }
+            });
+        });
+
+        Promise.all(deletePromises).then(() => {
+          renderTable();
+          deletedCount += ids.length;
+          document.getElementById("deletedCount").textContent =
+            deletedCount + " deleted this session";
+          showToast(
+            "🗑 " +
+              ids.length +
+              " challenge" +
+              (ids.length > 1 ? "s" : "") +
+              " removed",
+          );
+        });
+      }
+
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      renderTable();
+
+      const pC = document.getElementById("particles");
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.bottom = "-10px";
+        p.style.animationDuration = 7 + Math.random() * 14 + "s";
+        p.style.animationDelay = Math.random() * 12 + "s";
+        const sz = Math.random() > 0.6 ? 3 : 2;
+        p.style.width = p.style.height = sz + "px";
+        p.style.background =
+          Math.random() > 0.5 ? "var(--primary)" : "var(--accent)";
+        pC.appendChild(p);
+      }
+      const cO = document.getElementById("cursor-outer"),
+        cI = document.getElementById("cursor-inner");
+      let mX = 0,
+        mY = 0,
+        oX = 0,
+        oY = 0,
+        inInput = false;
+      document.addEventListener("mousemove", (e) => {
+        mX = e.clientX;
+        mY = e.clientY;
+        if (!inInput) {
+          cI.style.left = mX + "px";
+          cI.style.top = mY + "px";
+        }
+        requestAnimationFrame(() => {
+          oX += (mX - oX) * 0.25;
+          oY += (mY - oY) * 0.25;
+          if (!inInput) {
+            cO.style.left = oX + "px";
+            cO.style.top = oY + "px";
+          }
+        });
+        if (!inInput) {
+          const p = document.createElement("div");
+          p.className = "trail-particle";
+          p.style.left = mX + "px";
+          p.style.top = mY + "px";
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 600);
+        }
+      });
+      document.querySelectorAll("a,button,.topbar-icon-btn").forEach((el) => {
+        el.addEventListener("mouseenter", () =>
+          document.body.classList.add("cursor-hover"),
+        );
+        el.addEventListener("mouseleave", () =>
+          document.body.classList.remove("cursor-hover"),
+        );
+      });
+      document
+        .querySelectorAll(".search-input,.filter-select")
+        .forEach((inp) => {
+          inp.style.cursor = "text";
+          inp.addEventListener("mouseenter", () => {
+            inInput = true;
+            cO.style.opacity = "0";
+            cI.style.opacity = "0";
+          });
+          inp.addEventListener("mouseleave", () => {
+            inInput = false;
+            cO.style.opacity = "1";
+            cI.style.opacity = "1";
+          });
+        });
+      document.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("modal-overlay"))
+          for (let i = 0; i < 6; i++) {
+            const s = document.createElement("div");
+            s.className = "click-spark";
+            const a = (i / 6) * Math.PI * 2;
+            s.style.setProperty("--tx", Math.cos(a) * 20 + "px");
+            s.style.setProperty("--ty", Math.sin(a) * 20 + "px");
+            s.style.left = e.clientX + "px";
+            s.style.top = e.clientY + "px";
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 500);
+          }
+      });
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

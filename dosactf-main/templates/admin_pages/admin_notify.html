@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DosaCTF — Send Notification</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+<div class="particles" id="particles"></div>
+
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="{{ url_for('admin.admin_dashboard') }}" style="display: flex; align-items: center; text-decoration: none; gap: 10px;">
+      <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 6px;">
+      <span class="topbar-brand">DosaCTF</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-page">Admin › Send Notification</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-icon-btn" title="Notifications">
+      🔔
+      <div class="notif-badge">3</div>
+    </div>
+    <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+    <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+    <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+      <div class="profile-avatar">{{ (user.display_name or user.username)[:2].upper() if user else 'AD' }}</div>
+      <span class="profile-name">{{ user.display_name or 'Admin' if user else 'Admin' }}</span>
+      <span class="profile-arrow">▾</span>
+    </a>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">✉ Send Notification</div>
+      <div class="page-subtitle">// BROADCAST SECURE MESSAGES TO OPERATIVES</div>
+    </div>
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="back-btn">← Dashboard</a>
+  </div>
+
+  <div class="content-grid" style="display: block; max-width: 600px; margin: 0 auto;">
+    <div class="panel">
+      <div class="anim-bar"></div>
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Compose Message</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <div class="form-label">Target Audience <span class="form-label-req">*</span></div>
+          <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <label style="color: var(--text); font-family: 'Rajdhani', sans-serif;">
+              <input type="radio" name="targetType" value="all" checked onchange="toggleTargetInput()"> All Users
+            </label>
+            <label style="color: var(--text); font-family: 'Rajdhani', sans-serif;">
+              <input type="radio" name="targetType" value="specific" onchange="toggleTargetInput()"> Specific User
+            </label>
+          </div>
+          <input class="form-input" id="nTarget" placeholder="Enter username..." style="display: none;">
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <div class="form-label">Title <span class="form-label-req">*</span></div>
+          <input class="form-input" id="nTitle" placeholder="e.g. Server Maintenance, Event Update...">
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <div class="form-label">Message <span class="form-label-req">*</span></div>
+          <textarea class="form-textarea" id="nMessage" placeholder="Enter notification message here..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-top: 30px;">
+          <button class="btn-panel" style="width: 100%; display: block; text-align: center;" onclick="sendNotification()">
+            ► TRANSMIT MESSAGE
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/main.js"></script>
+<script>
+  function toggleTargetInput() {
+    const isSpecific = document.querySelector('input[name="targetType"]:checked').value === 'specific';
+    document.getElementById('nTarget').style.display = isSpecific ? 'block' : 'none';
+  }
+
+  function showToast(msg, isError=false) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.style.borderColor = isError ? 'var(--primary)' : 'var(--green)';
+    t.style.color = isError ? 'var(--primary)' : 'var(--green)';
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  function sendNotification() {
+    const type = document.querySelector('input[name="targetType"]:checked').value;
+    const target = type === 'all' ? 'all' : document.getElementById('nTarget').value.trim();
+    const title = document.getElementById('nTitle').value.trim();
+    const message = document.getElementById('nMessage').value.trim();
+
+    if (!title || !message) {
+      showToast('Title and message are required', true);
+      return;
+    }
+    if (type === 'specific' && !target) {
+      showToast('Specific username is required', true);
+      return;
+    }
+
+    fetch('/api/admin/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target, title, message })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showToast('✓ Notification sent successfully!');
+        document.getElementById('nTitle').value = '';
+        document.getElementById('nMessage').value = '';
+      } else {
+        showToast('⚠ Error: ' + data.message, true);
+      }
+    })
+    .catch(err => {
+      showToast('⚠ Network error', true);
+    });
+  }
+</script>
+</body>
+</html>

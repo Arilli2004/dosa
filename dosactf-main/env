@@ -1,0 +1,7 @@
+# DosaCTF Environment Configuration
+
+# Flask Session Secret Key (change this to a secure random value in production)
+SECRET_KEY=dosa-ctf-ultra-secret-2025-change-me
+
+# Supabase PostgreSQL Database URL (IPv4 Connection Pooler)
+DATABASE_URL=postgresql://postgres.faudfwaffqsnhfxlnnoh:Navanitha07...@aws-1-ap-south-1.pooler.supabase.com:5432/postgres

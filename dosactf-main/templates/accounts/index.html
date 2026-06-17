@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dosa CTF — Master the Art of Cyber Warfare</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+
+<!-- CURSOR ELEMENTS (ANIME STYLE) -->
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+<div id="cursor-sword" style="display: none !important;"></div>
+
+
+<nav>
+  <a href="/" class="logo">
+    
+    <!-- LOGO IMAGE -->
+    <img src="/static/Images/IMages_1.png" 
+         alt="Dosa CTF Logo" 
+         class="logo-img">
+
+    <!-- LOGO TEXT -->
+    <span class="logo-text">Dosa CTF</span>
+  </a>
+
+  <div class="nav-actions">
+    <a href="/login" class="btn-ghost">Login</a>
+    <a href="/register" class="btn-primary">Register</a>
+  </div>
+
+  <!-- MOBILE 3-DOT MENU (hidden on desktop via CSS) -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">⋮</button>
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-dropdown" id="mobileDropdown">
+    <a href="/login">🔑 Login</a>
+    <a href="/register">👤 Register</a>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-badge">New: Advanced Cloud Exploitation Challenges</div>
+  <h1>
+    Master the Art of
+    <span>Cyber Warfare</span>
+  </h1>
+  <p class="hero-desc">Dosa CTF is the ultimate playground for cybersecurity professionals and enthusiasts. Solve high-stakes challenges, capture flags, and secure your place at the top.</p>
+  <div class="hero-cta">
+    <a href="/register" class="btn-hero">Start Hacking Now <span class="arrow">→</span></a>
+  </div>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-url">user@flaghunt-ctf ~/challenges/web_exploitation $</span>
+    </div>
+    <div class="terminal-body">
+      <div class="cmd">$ nmap -sV -p 80,443 target.flaghunt.io</div>
+      <div class="cmd-output">Starting Nmap 7.93 (https://nmap.org) at 2024-09-20 14:33 UTC</div>
+      <div class="cmd-output">Nmap scan report for target.flaghunt.io (10.0.0.43)</div>
+      <div class="cmd-output">PORT&nbsp;&nbsp;STATE SERVICE VERSION</div>
+      <div class="cmd-output"><span class="highlight">80/tcp&nbsp; open&nbsp; http&nbsp;&nbsp;&nbsp; Apache httpd 2.4.41 (Ubuntu)</span></div>
+      <div class="cmd-output"><span class="highlight">443/tcp open&nbsp; ssl/http Apache httpd 2.4.41 (Ubuntu)</span></div>
+      <div class="cmd">$ <span class="cursor"></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal"><span class="stat-num">10k+</span><span class="stat-label">Active Hackers</span></div>
+    <div class="stat-item reveal" style="transition-delay:0.1s"><span class="stat-num">500+</span><span class="stat-label">Total Challenges</span></div>
+    <div class="stat-item reveal" style="transition-delay:0.2s"><span class="stat-num">50k+</span><span class="stat-label">Flags Captured</span></div>
+    <div class="stat-item reveal" style="transition-delay:0.3s"><span class="stat-num">200+</span><span class="stat-label">Active Organizations</span></div>
+  </div>
+</section>
+
+<div style="max-width:1200px;margin:0 auto;">
+  <section class="section">
+    <div class="section-label">Why Choose Dosa CTF?</div>
+    <h2 class="section-title reveal">A Comprehensive Ecosystem</h2>
+    <p class="section-sub reveal">We provide a comprehensive ecosystem designed to take you from a curious beginner to a world-class penetration tester.</p>
+    <div class="features-grid">
+      <div class="feature-card reveal"><div class="feature-icon">🌐</div><h3>Web Exploitation</h3><p>Dive into SQL injection, XSS, and broken access controls.</p></div>
+      <div class="feature-card reveal" style="transition-delay:0.1s"><div class="feature-icon">⚙️</div><h3>Binary &amp; Pwn</h3><p>Explore memory corruption, buffer overflows, and ROP chains.</p></div>
+      <div class="feature-card reveal" style="transition-delay:0.2s"><div class="feature-icon">🔒</div><h3>Cryptography</h3><p>Break complex ciphers and understand modern encryption.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">🗺️</div><h3>Real-world Scenarios</h3><p>Built from actual CVEs and historical breaches.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">🏆</div><h3>Competitive Ranking</h3><p>Climb the global leaderboard and earn badges.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">⚡</div><h3>Fast-Paced Learning</h3><p>Instant feedback and interactive labs.</p></div>
+    </div>
+  </section>
+</div>
+
+<section class="challenges-section">
+  <div class="challenges-inner">
+    <div class="challenges-header">
+      <div><div class="section-label">Battle-Tested Challenges</div><h2 class="section-title" style="font-size:clamp(22px,3vw,36px)">Get a taste of what awaits inside.</h2></div>
+      <a href="/register" class="view-all">View All Challenges →</a>
+    </div>
+    <div class="challenges-grid">
+      <div class="challenge-card reveal"><div class="challenge-meta"><span class="challenge-category">Web</span><span class="challenge-diff diff-easy">Easy</span></div><div class="challenge-icon">🍪</div><h3>Cookie Monster</h3><div class="challenge-points">Points: 100</div><div class="challenge-footer"><span class="challenge-auth">Authentication required</span><a href="/register" class="challenge-link">View Details →</a></div></div>
+      <div class="challenge-card reveal" style="transition-delay:0.1s"><div class="challenge-meta"><span class="challenge-category">Pwn</span><span class="challenge-diff diff-medium">Medium</span></div><div class="challenge-icon">💀</div><h3>Stack Overflow 101</h3><div class="challenge-points">Points: 250</div><div class="challenge-footer"><span class="challenge-auth">Authentication required</span><a href="/register" class="challenge-link">View Details →</a></div></div>
+      <div class="challenge-card reveal" style="transition-delay:0.2s"><div class="challenge-meta"><span class="challenge-category">Crypto</span><span class="challenge-diff diff-new">New</span></div><div class="challenge-icon">🔑</div><h3>The RSA Enigma</h3><div class="challenge-points">Points: 500</div><div class="challenge-footer"><span class="challenge-auth">Authentication required</span><a href="/register" class="challenge-link">View Details →</a></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="cta-inner">
+    <div class="cta-text"><h2>Ready to claim your spot on the leaderboard?</h2><p>Join thousands of other hackers honing their skills on FlagHunt.</p></div>
+    <div class="cta-actions">
+      {% if not session.get('user_id') %}
+        <button class="btn-cta" onclick="window.location.href='/register'">Register Your Account</button>
+        <span class="login-note">Already have an account? <a href="/login">Login here</a></span>
+      {% else %}
+        <button class="btn-cta" onclick="window.location.href='/dashboard'">Go to Dashboard</button>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--bg);border-top:1px solid var(--border);">
+  <div class="pro-section">
+    <div><div class="section-label">The Professional Standard</div><h2 class="section-title reveal">The Professional Standard for CTFs</h2>
+      <ul class="pro-list">
+        <li class="reveal"><span class="pro-check">▶</span> Detailed write-ups for completed challenges to accelerate learning.</li>
+        <li class="reveal" style="transition-delay:0.05s"><span class="pro-check">▶</span> Private team rooms for competing with friends or colleagues.</li>
+        <li class="reveal" style="transition-delay:0.1s"><span class="pro-check">▶</span> Automated instance deployment — no more shared, broken environments.</li>
+        <li class="reveal" style="transition-delay:0.15s"><span class="pro-check">▶</span> Discord integration for community support and real-time alerts.</li>
+        <li class="reveal" style="transition-delay:0.2s"><span class="pro-check">▶</span> Exportable skill profiles to showcase your achievements to employers.</li>
+      </ul>
+    </div>
+    <div class="stats-panel reveal">
+      <div class="stat-card"><div class="rank-badge">#1 GLOBAL</div><div class="stat-card-icon">🏅</div><div class="stat-card-num">—</div><div class="stat-card-label">Top Rank</div></div>
+      <div class="stat-card"><div class="stat-card-icon">🚩</div><div class="stat-card-num">428</div><div class="stat-card-label">Solves</div></div>
+      <div class="stat-card"><div class="stat-card-icon">📅</div><div class="stat-card-num">14 Days</div><div class="stat-card-label">Streak</div></div>
+      <div class="stat-card"><div class="stat-card-icon">💻</div><div class="stat-card-num">98.4%</div><div class="stat-card-label">Accuracy</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo" style="font-size:13px;">
+          <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 28px; height: 28px; object-fit: contain; border-radius: 6px;">
+          <span class="logo-text" style="font-size: 16px;">Dosa CTF</span>
+        </a>
+        <p>Master your cybersecurity skills through competitive challenge-solving.</p>
+      </div>
+      <div class="footer-col"><h4>Platform</h4><ul><li><a href="/register">Challenges</a></li><li><a href="/register">Leaderboard</a></li><li><a href="/register">Rules</a></li></ul></div>
+      <div class="footer-col"><h4>Support</h4><ul><li><a href="/register">Discord</a></li><li><a href="/register">Documentation</a></li><li><a href="/register">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a href="/register">Terms of Service</a></li><li><a href="/register">Privacy Policy</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 FlagHunt CTF. All rights reserved.</span><span>Built for elite hackers</span></div>
+  </div>
+</footer>
+
+<script src="/static/js/main.js"></script>
+<script>
+(function() {
+  const btn = document.getElementById('mobileMenuBtn');
+  const dropdown = document.getElementById('mobileDropdown');
+  const overlay = document.getElementById('mobileMenuOverlay');
+  if (!btn || !dropdown || !overlay) return;
+  function openMenu() { dropdown.classList.add('open'); overlay.classList.add('open'); }
+  function closeMenu() { dropdown.classList.remove('open'); overlay.classList.remove('open'); }
+  btn.addEventListener('click', function(e) { e.stopPropagation(); dropdown.classList.contains('open') ? closeMenu() : openMenu(); });
+  overlay.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeMenu(); });
+})();
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

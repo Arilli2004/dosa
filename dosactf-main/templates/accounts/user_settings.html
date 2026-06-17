@@ -1,0 +1,1743 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlagHunt CTF — Player Settings</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --bg2: #111111;
+        --bg3: #181818;
+        --primary: #D9A441;
+        --secondary: #8B5E34;
+        --text: #F5E6C8;
+        --accent: #FF7A30;
+        --muted: rgba(245, 230, 200, 0.45);
+        --border: rgba(217, 164, 65, 0.22);
+        --border2: rgba(245, 230, 200, 0.08);
+        --glow: 0 0 28px rgba(217, 164, 65, 0.45);
+        --glow-sm: 0 0 10px rgba(217, 164, 65, 0.3);
+        --green: #00e676;
+        --amber: #ffb300;
+        --blue: #3b8bff;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: "Rajdhani", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+        /* cursor none removed */
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          rgba(0, 0, 0, 0.07) 2px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        pointer-events: none;
+        z-index: 9998;
+      }
+
+      /* CURSOR */
+      #cursor-outer {
+        position: fixed;
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1),
+          height 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1),
+          border-color 0.2s,
+          background 0.2s,
+          box-shadow 0.2s,
+          opacity 0.2s;
+        mix-blend-mode: screen;
+        background: rgba(255, 59, 59, 0.03);
+        box-shadow: 0 0 12px rgba(255, 59, 59, 0.3);
+        left: -100px;
+        top: -100px;
+      }
+      #cursor-inner {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.12s ease-out,
+          height 0.12s ease-out,
+          background 0.15s,
+          box-shadow 0.15s,
+          opacity 0.2s;
+        box-shadow: 0 0 16px var(--primary);
+        left: -100px;
+        top: -100px;
+      }
+      #cursor-sword {
+        position: fixed;
+        pointer-events: none;
+        z-index: 99998;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 22px;
+        opacity: 0;
+        transition:
+          opacity 0.2s,
+          transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+        filter: drop-shadow(0 0 8px var(--primary));
+        left: -100px;
+        top: -100px;
+      }
+      .trail-particle {
+        position: fixed;
+        width: 6px;
+        height: 6px;
+        background: radial-gradient(circle, var(--accent), var(--primary));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99997;
+        transform: translate(-50%, -50%);
+        opacity: 0.8;
+        filter: blur(1px);
+        animation: trailFade 0.8s ease-out forwards;
+      }
+      @keyframes trailFade {
+        0% {
+          opacity: 0.8;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.2);
+        }
+      }
+      .click-spark {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99996;
+        transform: translate(-50%, -50%);
+        animation: sparkBurst 0.5s ease-out forwards;
+        box-shadow: 0 0 12px #ff5e5e;
+      }
+      @keyframes sparkBurst {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+          background: #ff5e5e;
+        }
+        50% {
+          opacity: 0.9;
+          transform: translate(
+              calc(-50% + var(--tx, 0px)),
+              calc(-50% + var(--ty, 0px))
+            )
+            scale(1.8);
+          background: #ffaa00;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(
+              calc(-50% + var(--tx, 0px) * 2),
+              calc(-50% + var(--ty, 0px) * 2)
+            )
+            scale(0);
+        }
+      }
+      .floating-orb {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: radial-gradient(circle, #ffaa00, var(--primary));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99995;
+        animation: orbFloat 1.2s ease-out forwards;
+        box-shadow: 0 0 8px #ffaa00;
+      }
+      @keyframes orbFloat {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(
+              calc(-50% + var(--fx, 0px)),
+              calc(-50% + var(--fy, -40px))
+            )
+            scale(0.3);
+        }
+      }
+      body.cursor-hover #cursor-outer {
+        width: 56px;
+        height: 56px;
+        border-color: var(--accent);
+        background: rgba(255, 59, 59, 0.15);
+        box-shadow: 0 0 28px rgba(255, 59, 59, 0.6);
+      }
+      body.cursor-hover #cursor-inner {
+        width: 4px;
+        height: 4px;
+        background: var(--accent);
+        box-shadow: 0 0 20px var(--accent);
+      }
+      body.cursor-hover #cursor-sword {
+        opacity: 1 !important;
+        transform: translate(-50%, -50%) rotate(-20deg) scale(1.2);
+      }
+
+      /* PARTICLES */
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .particle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0;
+        animation: float-up linear infinite;
+      }
+      @keyframes float-up {
+        0% {
+          opacity: 0;
+          transform: translateY(0) scale(0.5);
+        }
+        10% {
+          opacity: 0.5;
+        }
+        90% {
+          opacity: 0.1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-100vh) scale(1);
+        }
+      }
+
+      /* KEYFRAMES */
+      @keyframes bar-slide {
+        0% {
+          background-position: 0%;
+        }
+        100% {
+          background-position: 200%;
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes hex-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(255, 59, 59, 0);
+        }
+      }
+
+      .anim-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--secondary),
+          var(--primary),
+          var(--accent),
+          var(--primary),
+          var(--secondary)
+        );
+        background-size: 200% 100%;
+        animation: bar-slide 3s linear infinite;
+      }
+
+      /* TOPBAR */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 500;
+        height: 58px;
+        background: rgba(10, 10, 10, 0.95);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(14px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo-hex {
+        width: 30px;
+        height: 30px;
+        background: var(--primary);
+        flex-shrink: 0;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        animation: hex-pulse 2.5s ease-in-out infinite;
+      }
+      .topbar-brand {
+        font-family: "Orbitron", monospace;
+        font-weight: 900;
+        font-size: 16px;
+        color: var(--primary);
+        text-shadow: var(--glow-sm);
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        /* cursor none removed */
+      }
+      .topbar-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--border);
+      }
+      .topbar-page {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .topbar-icon-btn {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border2);
+        background: var(--bg2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        /* cursor none removed */
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        text-decoration: none;
+        color: var(--text);
+      }
+      .topbar-icon-btn:hover {
+        border-color: var(--primary);
+        background: rgba(255, 59, 59, 0.08);
+      }
+      .notif-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 8px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 6px var(--primary);
+      }
+      .topbar-profile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        padding: 4px 12px 4px 6px;
+        /* cursor none removed */
+        transition: border-color 0.2s;
+      }
+      .topbar-profile:hover {
+        border-color: var(--primary);
+      }
+      .profile-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a0a3a, var(--blue));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+      }
+      .profile-name {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .profile-arrow {
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      /* LAYOUT */
+      .main-content {
+        padding: 24px 28px 40px;
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+      .settings-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: sticky;
+        top: 78px;
+        animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+      }
+      .settings-content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+      }
+      .sidebar-label {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: var(--muted);
+        text-transform: uppercase;
+        padding: 8px 12px 4px;
+      }
+      .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        /* cursor none removed */
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        text-decoration: none;
+        background: transparent;
+      }
+      .sidebar-item:hover {
+        color: var(--text);
+        background: rgba(255, 59, 59, 0.06);
+        border-color: var(--border2);
+      }
+      .sidebar-item.active {
+        color: var(--primary);
+        background: rgba(255, 59, 59, 0.1);
+        border-color: var(--border);
+        box-shadow: inset 3px 0 0 var(--primary);
+      }
+      .sidebar-item-icon {
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+
+      /* PANEL */
+      .panel {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .panel::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        border-bottom: 2px solid var(--primary);
+        border-right: 2px solid var(--primary);
+      }
+      .panel-head {
+        padding: 14px 18px 12px;
+        border-bottom: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .panel-title {
+        font-family: "Orbitron", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 6px var(--primary);
+        animation: blink 1.5s ease-in-out infinite;
+        flex-shrink: 0;
+      }
+      .panel-body {
+        padding: 18px 20px;
+        flex: 1;
+      }
+
+      /* FORM */
+      .form-section {
+        margin-bottom: 20px;
+      }
+      .form-section:last-child {
+        margin-bottom: 0;
+      }
+      .form-section-title {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border2);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .form-row.full {
+        grid-template-columns: 1fr;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .form-label {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .form-input,
+      .form-select,
+      .form-textarea {
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 10px 14px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          background 0.2s;
+        width: 100%;
+      }
+      .form-textarea {
+        resize: vertical;
+        min-height: 70px;
+        font-family: "Rajdhani", sans-serif;
+      }
+      .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23FF3B3B' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+        /* cursor none removed */
+      }
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        border-color: var(--primary);
+        box-shadow:
+          0 0 0 3px rgba(255, 59, 59, 0.18),
+          0 0 18px rgba(255, 59, 59, 0.25);
+        background: #0d0000;
+      }
+
+      /* TOGGLE */
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        margin-bottom: 8px;
+        transition: border-color 0.2s;
+      }
+      .toggle-row:hover {
+        border-color: rgba(255, 59, 59, 0.3);
+      }
+      .toggle-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .toggle-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .toggle-desc {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 9px;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+      }
+      .toggle {
+        position: relative;
+        width: 42px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle-slider {
+        position: absolute;
+        /* cursor none removed */
+        inset: 0;
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        transition: 0.3s;
+        border-radius: 1px;
+      }
+      .toggle-slider:before {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        left: 3px;
+        bottom: 3px;
+        background: var(--muted);
+        transition: 0.3s;
+      }
+      input:checked + .toggle-slider {
+        background: rgba(255, 59, 59, 0.15);
+        border-color: var(--primary);
+      }
+      input:checked + .toggle-slider:before {
+        transform: translateX(19px);
+        background: var(--primary);
+        box-shadow: 0 0 8px var(--primary);
+      }
+
+      /* AVATAR PICKER */
+      .avatar-picker {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .avatar-opt {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 2px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-size: 14px;
+        font-weight: 700;
+        /* cursor none removed */
+        transition: all 0.2s;
+      }
+      .avatar-opt:hover {
+        border-color: var(--border);
+        transform: scale(1.08);
+      }
+      .avatar-opt.selected {
+        border-color: var(--primary);
+        box-shadow: 0 0 12px rgba(255, 59, 59, 0.4);
+      }
+
+      /* DANGER */
+      .danger-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: var(--bg3);
+        border: 1px solid rgba(255, 59, 59, 0.15);
+        margin-bottom: 8px;
+        transition: border-color 0.2s;
+      }
+      .danger-item:hover {
+        border-color: rgba(255, 59, 59, 0.4);
+      }
+      .danger-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .danger-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .danger-desc {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .btn-danger {
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        padding: 7px 16px;
+        font-family: "Orbitron", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        /* cursor none removed */
+        transition: all 0.22s;
+        flex-shrink: 0;
+      }
+      .btn-danger:hover {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: var(--glow-sm);
+      }
+      .btn-panel {
+        display: inline-block;
+        background: var(--primary);
+        border: none;
+        color: #fff;
+        padding: 11px 24px;
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-align: center;
+        text-decoration: none;
+        /* cursor none removed */
+        clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        transition: all 0.22s;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-panel:hover {
+        background: var(--accent);
+        box-shadow: var(--glow);
+        transform: translateY(-2px);
+      }
+      .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 9px 18px;
+        font-family: "Orbitron", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        /* cursor none removed */
+        transition: all 0.22s;
+      }
+      .btn-outline:hover {
+        border-color: var(--primary);
+        color: var(--text);
+        background: rgba(255, 59, 59, 0.07);
+      }
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+        align-items: center;
+      }
+
+      /* TOAST */
+      .save-toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--bg2);
+        border: 1px solid var(--green);
+        padding: 14px 22px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 11px;
+        color: var(--green);
+        letter-spacing: 1px;
+        z-index: 9990;
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+      }
+      .save-toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .input-highlight {
+        border-color: var(--primary) !important;
+        box-shadow:
+          0 0 0 3px rgba(255, 59, 59, 0.18),
+          0 0 18px rgba(255, 59, 59, 0.25) !important;
+        background: #0d0000 !important;
+      }
+
+      @media (max-width: 900px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+        .settings-sidebar {
+          position: static;
+        }
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+  <body>
+    <div id="cursor-outer"></div>
+    <div id="cursor-inner"></div><div id="cursor-sword" style="display: none !important;"></div>
+    
+    <div class="particles" id="particles"></div>
+    <div class="save-toast" id="save-toast">✓ Settings saved successfully</div>
+
+    <nav class="topbar">
+      <div class="topbar-left">
+        <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+          <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 6px;">
+          <span class="topbar-brand">DosaCTF</span>
+        </a>
+        <div class="topbar-divider"></div>
+        <div class="topbar-item active">Settings</div>
+        <div class="topbar-item">Activity</div>
+      </div>
+      <div class="topbar-right">
+        <a href="/notifications" class="topbar-icon-btn" title="Notifications" style="text-decoration: none;">
+          🔔
+          <div class="notif-badge">0</div>
+        </a>
+        <a href="/dashboard" class="topbar-icon-btn" title="Dashboard" style="text-decoration: none;">
+          🖥️
+        </a>
+        <a href="/logout" class="topbar-icon-btn" title="Logout" style="text-decoration: none; color: #ff3b3b; border-color: #ff3b3b; background: rgba(255, 59, 59, 0.1);">
+          🚪
+        </a>
+        <div class="topbar-profile">
+          <div class="profile-avatar" style="background: {{ session.get('avatar_style', 'linear-gradient(135deg, #1a0a3a, var(--blue))') }};">{{ session.get('avatar', 'ZC') }}</div>
+          <span class="profile-name">{% if session.get('display_name') %}{{ session.get('display_name') }}{% elif session.get('username') %}{{ session.get('username') }}{% else %}Operative{% endif %}</span>
+          <span class="profile-arrow">▾</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <!-- SIDEBAR -->
+      <div class="settings-sidebar">
+        <div class="sidebar-label">Settings</div>
+        <a href="#profile" class="sidebar-item active"
+          ><span class="sidebar-item-icon">👤</span>Profile</a
+        >
+        <a href="#avatar" class="sidebar-item"
+          ><span class="sidebar-item-icon">🎨</span>Avatar</a
+        >
+        <a href="#security" class="sidebar-item"
+          ><span class="sidebar-item-icon">🔐</span>Security</a
+        >
+        <a href="#privacy" class="sidebar-item"
+          ><span class="sidebar-item-icon">🕵️</span>Privacy</a
+        >
+        <a href="#notifications" class="sidebar-item"
+          ><span class="sidebar-item-icon">🔔</span>Notifications</a
+        >
+        <a href="#danger" class="sidebar-item"
+          ><span class="sidebar-item-icon">⚠️</span>Account</a
+        >
+      </div>
+
+      <!-- CONTENT -->
+      <div class="settings-content">
+        <!-- Profile -->
+        <div class="panel" id="profile">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Profile Settings
+            </div>
+            <span
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 9px;
+                color: var(--muted);
+              "
+              >UID-042</span
+            >
+          </div>
+          <div class="panel-body">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div style="padding: 12px; margin-bottom: 16px; border: 1px solid {% if category == 'success' %}var(--green){% else %}#ff3b3b{% endif %}; background: rgba({% if category == 'success' %}0, 230, 118{% else %}255, 59, 59{% endif %}, 0.1); color: {% if category == 'success' %}var(--green){% else %}#ff3b3b{% endif %}; font-family: 'Share Tech Mono', monospace; font-size: 12px;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('user_settings') }}">
+              <div class="form-section">
+                <div class="form-section-title">Identity</div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Display Name</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      name="display_name"
+                      value="{{ user.display_name if user.display_name else user.username }}"
+                      placeholder="Your display name"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Username (Immutable)</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      value="{{ user.username }}"
+                      readonly
+                      style="opacity: 0.6; cursor: not-allowed;"
+                      title="Your login username cannot be changed."
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input
+                      class="form-input"
+                      type="email"
+                      name="email"
+                      value="{{ user.email }}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Country</label>
+                    <select class="form-select" name="country">
+                      <option>🇮🇳 India</option>
+                      <option>🇺🇸 United States</option>
+                      <option>🇬🇧 United Kingdom</option>
+                      <option>🇩🇪 Germany</option>
+                      <option>🇯🇵 Japan</option>
+                      <option>🌍 Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row full">
+                  <div class="form-group">
+                    <label class="form-label">Bio (shown on profile)</label>
+                    <textarea
+                      class="form-textarea"
+                      name="bio"
+                      placeholder="Tell the CTF community about yourself..."
+                    >CTF enthusiast. Pwn & crypto specialist.</textarea>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Website / GitHub</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      name="website"
+                      placeholder="https://github.com/..."
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn-panel">
+                  Save Profile
+                </button>
+                <a href="/dashboard" class="btn-outline">← Back to Dashboard</a>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="panel" id="avatar">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Avatar Customization
+            </div>
+          </div>
+          <div class="panel-body">
+            <form method="POST" action="{{ url_for('user_settings') }}">
+              <input type="hidden" name="form_type" value="avatar" />
+              <input type="hidden" name="avatar_style" id="avatar_style" value="{{ session.get('avatar_style', 'linear-gradient(135deg, #1a0a3a, var(--blue))') }}" />
+              <div class="form-section">
+                <div class="form-section-title">Choose Avatar Style</div>
+                <div class="avatar-picker">
+                  <div class="avatar-opt {% if session.get('avatar_style') == 'linear-gradient(135deg, #1a0a3a, var(--blue))' or not session.get('avatar_style') %}selected{% endif %}" onclick="selectAvatarStyle(this, 'linear-gradient(135deg, #1a0a3a, var(--blue))')" style="background: linear-gradient(135deg, #1a0a3a, var(--blue)); cursor: pointer;">
+                    {{ session.get('avatar', 'ZC') }}
+                  </div>
+                  <div class="avatar-opt {% if session.get('avatar_style') == 'linear-gradient(135deg, #0a2a1a, var(--green))' %}selected{% endif %}" onclick="selectAvatarStyle(this, 'linear-gradient(135deg, #0a2a1a, var(--green))')" style="background: linear-gradient(135deg, #0a2a1a, var(--green)); cursor: pointer;">
+                    {{ session.get('avatar', 'ZC') }}
+                  </div>
+                  <div class="avatar-opt {% if session.get('avatar_style') == 'linear-gradient(135deg, var(--secondary), var(--primary))' %}selected{% endif %}" onclick="selectAvatarStyle(this, 'linear-gradient(135deg, var(--secondary), var(--primary))')" style="background: linear-gradient(135deg, var(--secondary), var(--primary)); cursor: pointer;">
+                    {{ session.get('avatar', 'ZC') }}
+                  </div>
+                  <div class="avatar-opt {% if session.get('avatar_style') == 'linear-gradient(135deg, #1a1a00, var(--amber))' %}selected{% endif %}" onclick="selectAvatarStyle(this, 'linear-gradient(135deg, #1a1a00, var(--amber))')" style="background: linear-gradient(135deg, #1a1a00, var(--amber)); cursor: pointer;">
+                    {{ session.get('avatar', 'ZC') }}
+                  </div>
+                  <div class="avatar-opt {% if session.get('avatar_style') == 'linear-gradient(135deg, #1a0a2a, #b44eff)' %}selected{% endif %}" onclick="selectAvatarStyle(this, 'linear-gradient(135deg, #1a0a2a, #b44eff)')" style="background: linear-gradient(135deg, #1a0a2a, #b44eff); cursor: pointer;">
+                    {{ session.get('avatar', 'ZC') }}
+                  </div>
+                  <div class="avatar-opt {% if session.get('avatar_style') == 'linear-gradient(135deg, #111, #555)' %}selected{% endif %}" onclick="selectAvatarStyle(this, 'linear-gradient(135deg, #111, #555)')" style="background: linear-gradient(135deg, #111, #555); cursor: pointer;">
+                    {{ session.get('avatar', 'ZC') }}
+                  </div>
+                </div>
+                <script>
+                  function selectAvatarStyle(element, style) {
+                    document.querySelectorAll('.avatar-opt').forEach(opt => opt.classList.remove('selected'));
+                    element.classList.add('selected');
+                    document.getElementById('avatar_style').value = style;
+                  }
+                </script>
+                <p style="font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.5px;">
+                  Click to select your avatar color theme
+                </p>
+              </div>
+              <div class="form-section">
+                <div class="form-section-title">Custom Avatar</div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Avatar Initials</label>
+                    <input class="form-input" type="text" name="avatar" value="{{ session.get('avatar', 'ZC') }}" maxlength="2" placeholder="2 letters" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Upload Image (coming soon)</label>
+                    <input class="form-input" type="text" placeholder="Avatar upload — coming soon" disabled style="opacity: 0.4" />
+                  </div>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn-panel">Save Avatar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="panel" id="security">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Security
+            </div>
+          </div>
+          <div class="panel-body">
+            <form method="POST" action="{{ url_for('user_settings') }}">
+              <input type="hidden" name="form_type" value="password" />
+              <div class="form-section">
+                <div class="form-section-title">Change Password</div>
+                <div class="form-row">
+                  <div class="form-group" style="position: relative;">
+                    <label class="form-label">Current Password</label>
+                    <input
+                      class="form-input pwd-input"
+                      type="password"
+                      name="current_password"
+                    placeholder="••••••••••••"
+                    />
+                    
+                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 38px; cursor: pointer; opacity: 0.6;">👁️</span>
+                  </div>
+                  <div class="form-group" style="position: relative;">
+                    <label class="form-label">New Password</label>
+                    <input
+                      class="form-input pwd-input"
+                      type="password"
+                      name="new_password"
+                    placeholder="New strong password"
+                    />
+                    
+                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 38px; cursor: pointer; opacity: 0.6;">👁️</span>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group" style="position: relative;">
+                    <label class="form-label">Confirm Password</label>
+                    <input
+                      class="form-input pwd-input"
+                      type="password"
+                      name="confirm_password"
+                    placeholder="Repeat new password"
+                    />
+                    
+                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 38px; cursor: pointer; opacity: 0.6;">👁️</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Action</label>
+                    <button type="submit" class="btn-primary" style="width: 100%; height: 42px;">Update Password</button>
+                  </div>
+                </div>
+                <script>
+                  function togglePwd(el) {
+                    const input = el.previousElementSibling;
+                    if (input.type === 'password') {
+                      input.type = 'text';
+                      el.textContent = '🔒';
+                    } else {
+                      input.type = 'password';
+                      el.textContent = '👁️';
+                    }
+                  }
+                </script>
+              </div>
+            </form>
+            <div class="form-section">
+              <div class="form-section-title">Two-Factor Authentication</div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-name">Enable 2FA (TOTP)</div>
+                  <div class="toggle-desc">
+                    Require authenticator app on login
+                  </div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="tfa-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 2FA Modal -->
+            <div id="tfa-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+              <div style="background: var(--bg2); border: 1px solid var(--border); padding: 30px; border-radius: 8px; width: 100%; max-width: 400px; text-align: center;">
+                <h3 style="color: var(--text); font-family: 'Orbitron', monospace; margin-bottom: 15px;">Setup 2FA</h3>
+                <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;">Scan this QR code with Google Authenticator or Authy.</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=otpauth://totp/DOSACTF?secret=JBSWY3DPEHPK3PXP" alt="QR Code" style="margin-bottom: 20px; border: 4px solid #fff; border-radius: 4px;">
+                <div class="form-group">
+                  <input type="text" id="tfa-code" class="form-input" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 4px;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                  <button id="tfa-cancel" class="btn-outline" style="flex: 1;">Cancel</button>
+                  <button id="tfa-verify" class="btn-primary" style="flex: 1;">Verify</button>
+                </div>
+                <div id="tfa-msg" style="margin-top: 15px; color: var(--red); font-size: 13px;"></div>
+              </div>
+            </div>
+            
+            <script>
+              const tfaToggle = document.getElementById('tfa-toggle');
+              const tfaModal = document.getElementById('tfa-modal');
+              const tfaCancel = document.getElementById('tfa-cancel');
+              const tfaVerify = document.getElementById('tfa-verify');
+              const tfaCode = document.getElementById('tfa-code');
+              const tfaMsg = document.getElementById('tfa-msg');
+
+              tfaToggle.addEventListener('change', function(e) {
+                if (this.checked) {
+                  e.preventDefault();
+                  this.checked = false; // keep off until verified
+                  tfaModal.style.display = 'flex';
+                  tfaCode.value = '';
+                  tfaMsg.textContent = '';
+                }
+              });
+
+              tfaCancel.addEventListener('click', () => {
+                tfaModal.style.display = 'none';
+              });
+
+              tfaVerify.addEventListener('click', () => {
+                if (tfaCode.value.length === 6) {
+                  tfaMsg.style.color = 'var(--green)';
+                  tfaMsg.textContent = '2FA Verified and Enabled!';
+                  setTimeout(() => {
+                    tfaModal.style.display = 'none';
+                    tfaToggle.checked = true;
+                  }, 1000);
+                } else {
+                  tfaMsg.style.color = 'var(--red)';
+                  tfaMsg.textContent = 'Invalid code. Use 123456 to mock.';
+                }
+              });
+            </script>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Login Notifications</div>
+                <div class="toggle-desc">
+                  Email alert on each new device login
+                </div>
+              </div>
+              <label class="toggle"
+                ><input type="checkbox" checked /><span
+                  class="toggle-slider"
+                ></span
+              ></label>
+            </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-panel" onclick="showToast()">
+                Update Security
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="panel" id="privacy">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Privacy Settings
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Show Profile Publicly</div>
+                <div class="toggle-desc">
+                  Allow others to view your profile page
+                </div>
+              </div>
+              <label class="toggle"
+                ><input type="checkbox" checked /><span
+                  class="toggle-slider"
+                ></span
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Show on Leaderboard</div>
+                <div class="toggle-desc">
+                  Display your name in public rankings
+                </div>
+              </div>
+              <label class="toggle"
+                ><input type="checkbox" checked /><span
+                  class="toggle-slider"
+                ></span
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Show Solve History</div>
+                <div class="toggle-desc">
+                  Let others see which challenges you solved
+                </div>
+              </div>
+              <label class="toggle"
+                ><input type="checkbox" /><span class="toggle-slider"></span
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Show Team Membership</div>
+                <div class="toggle-desc">Display your team name on profile</div>
+              </div>
+              <label class="toggle"
+                ><input type="checkbox" checked /><span
+                  class="toggle-slider"
+                ></span
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Show Country Flag</div>
+                <div class="toggle-desc">
+                  Display country of origin on profile
+                </div>
+              </div>
+              <label class="toggle"
+                ><input type="checkbox" checked /><span
+                  class="toggle-slider"
+                ></span
+              ></label>
+            </div>
+            <div class="btn-row">
+              <button class="btn-panel" onclick="showToast()">
+                Save Privacy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="panel" id="notifications">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Notification Settings
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="form-section">
+              <div class="form-section-title">CTF Alerts</div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-name">New Challenge Released</div>
+                  <div class="toggle-desc">
+                    Get notified when new flags drop
+                  </div>
+                </div>
+                <label class="toggle"
+                  ><input type="checkbox" checked /><span
+                    class="toggle-slider"
+                  ></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-name">Rank Change Alert</div>
+                  <div class="toggle-desc">
+                    Notify when your leaderboard rank changes
+                  </div>
+                </div>
+                <label class="toggle"
+                  ><input type="checkbox" checked /><span
+                    class="toggle-slider"
+                  ></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-name">Event Start / End Reminders</div>
+                  <div class="toggle-desc">
+                    Get notified 1 hour before events
+                  </div>
+                </div>
+                <label class="toggle"
+                  ><input type="checkbox" checked /><span
+                    class="toggle-slider"
+                  ></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-name">Team Invite Notifications</div>
+                  <div class="toggle-desc">
+                    Alert when invited to join a team
+                  </div>
+                </div>
+                <label class="toggle"
+                  ><input type="checkbox" checked /><span
+                    class="toggle-slider"
+                  ></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-name">Achievement Unlocked</div>
+                  <div class="toggle-desc">
+                    Celebrate new badge/XP milestones
+                  </div>
+                </div>
+                <label class="toggle"
+                  ><input type="checkbox" checked /><span
+                    class="toggle-slider"
+                  ></span
+                ></label>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-section-title">Delivery</div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Notification Email</label>
+                  <input
+                    class="form-input"
+                    type="email"
+                    value="zerocool@example.com"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Frequency</label>
+                  <select class="form-select">
+                    <option>Instant</option>
+                    <option selected>Batched (every 2 hrs)</option>
+                    <option>Daily digest</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-panel" onclick="showToast()">
+                Save Notifications
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account / Danger -->
+        <div class="panel" id="danger">
+          <div class="anim-bar"></div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>
+              Account Management
+            </div>
+            <span
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 9px;
+                color: var(--primary);
+                letter-spacing: 1.5px;
+              "
+              >CAUTION</span
+            >
+          </div>
+          <div class="panel-body">
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Export My Data</div>
+                <div class="danger-desc">
+                  Download all your profile, solves & stats as JSON
+                </div>
+              </div>
+              <button
+                class="btn-danger"
+                style="border-color: var(--blue); color: var(--blue)"
+                onmouseover="this.style.background = 'var(--blue)'"
+                onmouseout="this.style.background = 'transparent'"
+              >
+                Export
+              </button>
+            </div>
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Leave Team</div>
+                <div class="danger-desc">Remove yourself from PhantomCore</div>
+              </div>
+              <button
+                class="btn-danger"
+                style="border-color: var(--amber); color: var(--amber)"
+                onmouseover="this.style.background = 'var(--amber)'"
+                onmouseout="this.style.background = 'transparent'"
+              >
+                Leave
+              </button>
+            </div>
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Logout All Devices</div>
+                <div class="danger-desc">
+                  Invalidate all your active sessions
+                </div>
+              </div>
+              <button class="btn-danger">Logout All</button>
+            </div>
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Delete Account</div>
+                <div class="danger-desc">
+                  Permanently erase your account & all data
+                </div>
+              </div>
+              <button class="btn-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const pCont = document.getElementById("particles");
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.bottom = "-10px";
+        p.style.animationDuration = 7 + Math.random() * 14 + "s";
+        p.style.animationDelay = Math.random() * 12 + "s";
+        const sz = Math.random() > 0.6 ? 3 : 2;
+        p.style.width = p.style.height = sz + "px";
+        p.style.background =
+          Math.random() > 0.5 ? "var(--primary)" : "var(--accent)";
+        pCont.appendChild(p);
+      }
+
+      const cOuter = document.getElementById("cursor-outer");
+      const cInner = document.getElementById("cursor-inner");
+      const cSword = document.getElementById("cursor-sword");
+      let mX = 0,
+        mY = 0,
+        oX = 0,
+        oY = 0,
+        lX = 0,
+        lY = 0,
+        inInput = false;
+      document.addEventListener("mousemove", (e) => {
+        mX = e.clientX;
+        mY = e.clientY;
+        if (!inInput) {
+          cInner.style.left = mX + "px";
+          cInner.style.top = mY + "px";
+          cSword.style.left = mX + 18 + "px";
+          cSword.style.top = mY - 18 + "px";
+        }
+        const dx = mX - lX,
+          dy = mY - lY;
+        if ((Math.abs(dx) > 1 || Math.abs(dy) > 1) && !inInput) {
+          cSword.style.transform = `translate(-50%,-50%) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI - 45}deg)`;
+          createTrail(mX, mY);
+        }
+        lX = mX;
+        lY = mY;
+        requestAnimationFrame(() => {
+          oX += (mX - oX) * 0.25;
+          oY += (mY - oY) * 0.25;
+          if (!inInput) {
+            cOuter.style.left = oX + "px";
+            cOuter.style.top = oY + "px";
+          }
+        });
+      });
+      function createTrail(x, y) {
+        const p = document.createElement("div");
+        p.className = "trail-particle";
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 800);
+      }
+      function createSparks(x, y) {
+        for (let i = 0; i < 8; i++) {
+          const s = document.createElement("div");
+          s.className = "click-spark";
+          const a = (i / 8) * Math.PI * 2;
+          s.style.setProperty(
+            "--tx",
+            Math.cos(a) * (Math.random() * 20 + 8) + "px",
+          );
+          s.style.setProperty(
+            "--ty",
+            Math.sin(a) * (Math.random() * 20 + 8) + "px",
+          );
+          s.style.left = x + "px";
+          s.style.top = y + "px";
+          document.body.appendChild(s);
+          setTimeout(() => s.remove(), 500);
+        }
+        for (let i = 0; i < 4; i++) {
+          const o = document.createElement("div");
+          o.className = "floating-orb";
+          o.style.left = x + (Math.random() - 0.5) * 40 + "px";
+          o.style.top = y + (Math.random() - 0.5) * 40 + "px";
+          o.style.setProperty("--fx", (Math.random() - 0.5) * 60 + "px");
+          o.style.setProperty("--fy", (Math.random() - 0.5) * 50 - 30 + "px");
+          document.body.appendChild(o);
+          setTimeout(() => o.remove(), 1200);
+        }
+      }
+
+      document
+        .querySelectorAll(
+          "a,button,.btn-panel,.btn-outline,.btn-danger,.topbar-icon-btn,.topbar-profile,.sidebar-item,.panel,.toggle-row,.danger-item,.avatar-opt",
+        )
+        .forEach((el) => {
+          el.addEventListener("mouseenter", () => {
+            if (!inInput) document.body.classList.add("cursor-hover");
+          });
+          el.addEventListener("mouseleave", () =>
+            document.body.classList.remove("cursor-hover"),
+          );
+          el.addEventListener("click", (e) =>
+            createSparks(e.clientX, e.clientY),
+          );
+        });
+      document
+        .querySelectorAll(".form-input,.form-select,.form-textarea")
+        .forEach((inp) => {
+          inp.style.cursor = "text";
+          inp.addEventListener("mouseenter", () => {
+            inInput = true;
+            cOuter.style.opacity = "0";
+            cInner.style.opacity = "0";
+            cSword.style.opacity = "0";
+            inp.classList.add("input-highlight");
+          });
+          inp.addEventListener("mouseleave", () => {
+            inInput = false;
+            cInner.style.left = mX + "px";
+            cInner.style.top = mY + "px";
+            cOuter.style.left = mX + "px";
+            cOuter.style.top = mY + "px";
+            oX = mX;
+            oY = mY;
+            cOuter.style.opacity = "1";
+            cInner.style.opacity = "1";
+            if (document.activeElement !== inp)
+              inp.classList.remove("input-highlight");
+          });
+          inp.addEventListener("blur", () =>
+            inp.classList.remove("input-highlight"),
+          );
+        });
+      document.addEventListener("click", (e) => {
+        createSparks(e.clientX, e.clientY);
+        document.body.classList.add("cursor-click");
+        setTimeout(() => document.body.classList.remove("cursor-click"), 150);
+      });
+
+      /* SIDEBAR ACTIVE */
+      document.querySelectorAll('.sidebar-item[href^="#"]').forEach((item) => {
+        item.addEventListener("click", () => {
+          document
+            .querySelectorAll(".sidebar-item")
+            .forEach((i) => i.classList.remove("active"));
+          item.classList.add("active");
+        });
+      });
+
+      /* AVATAR PICKER */
+      document.querySelectorAll(".avatar-opt").forEach((opt) => {
+        opt.addEventListener("click", () => {
+          document
+            .querySelectorAll(".avatar-opt")
+            .forEach((o) => o.classList.remove("selected"));
+          opt.classList.add("selected");
+        });
+      });
+
+      function showToast() {
+        const t = document.getElementById("save-toast");
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Password Visibility Toggle
+      document.querySelectorAll('.pwd-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const input = this.previousElementSibling;
+          if (input.type === 'password') {
+            input.type = 'text';
+            this.textContent = '👁‍🗨'; // Optional: Use different icon when visible
+            this.style.color = 'var(--primary)';
+          } else {
+            input.type = 'password';
+            this.textContent = '👁';
+            this.style.color = 'var(--muted)';
+          }
+        });
+      });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dosa CTF — Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* OVERRIDE BOOTSTRAP */
+      body {
+        background: #0A0A0A !important;
+        background-color: #0A0A0A !important;
+        color: #F5E6C8 !important;
+      }
+      /* FIX CURSOR FOR DESKTOP AND MOBILE */
+      @media (pointer: fine) {
+        body { cursor: auto !important; }
+      }
+      @media (hover: none) and (pointer: coarse) {
+        #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
+        body { cursor: auto !important; }
+      }
+    </style>
+</head>
+<body>
+
+  <!-- CURSOR -->
+  <div id="cursor-outer"></div>
+  <div id="cursor-inner"></div>
+  <div id="cursor-sword" style="display: none !important;"></div>
+
+<!-- ══════════ TOPBAR ══════════ -->
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="#" style="display: flex; align-items: center; text-decoration: none; gap: 10px;">
+      <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 6px;">
+      <span class="topbar-brand">DosaCTF</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-page">Admin Leaderboard</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-icon-btn" title="Notifications">
+      🔔
+      <div class="notif-badge">3</div>
+    </div>
+    <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
+    <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+    <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
+      <div class="profile-avatar">{{ (user.display_name or user.username)[:2].upper() if user else 'AD' }}</div>
+      <span class="profile-name">{{ user.display_name or 'Admin' if user else 'Admin' }}</span>
+      <span class="profile-arrow">▾</span>
+    </a>
+  </div>
+</nav>
+
+<div class="main-content">
+  <!-- Back button -->
+  <div style="margin-bottom: 20px;">
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn-outline" style="text-decoration:none; color: var(--muted); border: 1px solid var(--border); padding: 5px 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; border-radius: 4px;">
+      ← Back to Dashboard
+    </a>
+  </div>
+
+  <div class="page-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="header-wm">LEADERBOARD</div>
+      <div class="page-header-inner">
+        <div class="section-label">▶ Global Rankings</div>
+        <h1 class="page-title">Hall of <span>Legends</span></h1>
+        <p class="page-subtitle">The elite hackers who dominate Dosa CTF. Capture flags, climb ranks, claim glory.</p>
+        <div class="header-stats">
+          <div class="hstat"><span class="hstat-num" id="total-registered-hackers">0</span> Registered Hackers</div>
+          <div class="hstat-div"></div>
+          <div class="hstat"><span class="hstat-num" id="total-flags-captured">0</span> Flags Captured</div>
+          <div class="hstat-div"></div>
+          <div class="hstat">Updated <span class="hstat-num" style="font-size:13px;margin-left:4px">Live</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="filter-inner">
+        <div class="search-wrap">
+          <input type="text" id="search-input" placeholder="Search players...">
+        </div>
+
+        <div class="sel-wrap">
+          <select class="f-select" id="country-select">
+            <option value="">All Countries</option>
+            <option value="🇺🇸">United States</option>
+            <option value="🇩🇪">Germany</option>
+            <option value="🇯🇵">Japan</option>
+            <option value="🇧🇷">Brazil</option>
+            <option value="🇬🇧">United Kingdom</option>
+            <option value="🇮🇳">India</option>
+            <option value="🇷🇺">Russia</option>
+            <option value="🇨🇳">China</option>
+            <option value="🇫🇷">France</option>
+            <option value="🇰🇷">South Korea</option>
+          </select>
+        </div>
+
+        <div class="filter-div"></div>
+
+        <div class="tab-group" id="period-tabs">
+          <button class="tab-btn active" data-period="overall">Overall</button>
+          <button class="tab-btn" data-period="daily">Daily</button>
+          <button class="tab-btn" data-period="weekly">Weekly</button>
+          <button class="tab-btn" data-period="monthly">Monthly</button>
+        </div>
+
+        <div class="result-info" id="result-info">Showing <span id="visible-count">0</span> hackers</div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD CONTENT -->
+    <div class="lb-content">
+      <div class="lb-inner">
+
+        <!-- PODIUM -->
+        <div class="podium-section">
+          <div class="podium-title">Top 3 Champions</div>
+          <div class="podium" id="podium">
+             <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- FULL TABLE -->
+        <div class="table-section">
+          <div class="table-header-row">
+            <div class="table-title">Full Rankings</div>
+          </div>
+
+          <div class="lb-table">
+            <div class="lb-col-head">
+              <span>Rank</span>
+              <span>Player</span>
+              <span style="text-align:center">Flags</span>
+              <span style="text-align:center">Accuracy</span>
+              <span style="text-align:center">Streak</span>
+              <span style="text-align:right">Score</span>
+            </div>
+
+            <div id="lb-rows">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- YOU ARE HERE -->
+          <div class="you-banner" id="personal-banner" style="display:none;">
+            <div class="you-label" id="personal-rank-label">▶ Your Position — #— Global</div>
+            <div class="you-info">
+              <div class="you-stat"><div class="you-stat-num" id="personal-score">—</div><div class="you-stat-lbl">Points</div></div>
+              <div class="you-stat"><div class="you-stat-num" id="personal-solves">—</div><div class="you-stat-lbl">Solves</div></div>
+              <div class="you-stat"><div class="you-stat-num">100%</div><div class="you-stat-lbl">Accuracy</div></div>
+              <div class="you-stat"><div class="you-stat-num">Live</div><div class="you-stat-lbl">Status</div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-left">© 2026 DOSA CTF · BUILT FOR ELITE HACKERS</div>
+        <div class="footer-links">
+          <a href="#">Rules</a>
+          <a href="#">Discord</a>
+          <a href="#">Docs</a>
+          <a href="#">Privacy</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/static/js/main.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const podiumContainer = document.getElementById('podium');
+      const rowsContainer = document.getElementById('lb-rows');
+      const searchInput = document.getElementById('search-input');
+      const currentUsername = "{% if session.get('username') %}{{ session.get('username') }}{% else %}{% endif %}";
+      const periodTabs = document.querySelectorAll('#period-tabs .tab-btn');
+      
+      let currentPeriod = 'overall';
+      let leaderboard = [];
+
+      periodTabs.forEach(tab => {
+          tab.addEventListener('click', (e) => {
+              periodTabs.forEach(t => t.classList.remove('active'));
+              e.target.classList.add('active');
+              currentPeriod = e.target.dataset.period;
+              updateLeaderboard();
+          });
+      });
+
+      function updateStats() {
+          fetch('/api/stats')
+              .then(res => res.json())
+              .then(data => {
+                  if (data.success) {
+                      document.getElementById('total-registered-hackers').textContent = data.total_players;
+                      document.getElementById('total-flags-captured').textContent = data.total_solves;
+                      
+                      if (currentUsername) {
+                          document.getElementById('personal-banner').style.display = 'block';
+                          document.getElementById('personal-rank-label').textContent = `▶ Your Position — #${data.user_rank} Global`;
+                          document.getElementById('personal-score').textContent = data.user_score.toLocaleString();
+                          document.getElementById('personal-solves').textContent = data.user_solves;
+                      }
+                  }
+              })
+              .catch(err => console.error("Error fetching leaderboard stats:", err));
+      }
+
+      function updateLeaderboard() {
+          fetch('/api/leaderboard?period=' + currentPeriod)
+              .then(res => res.json())
+              .then(data => {
+                  if (data.success) {
+                      leaderboard = data.leaderboard;
+                      renderLeaderboard();
+                  }
+              })
+              .catch(err => console.error("Error fetching leaderboard list:", err));
+      }
+
+      function renderLeaderboard() {
+          const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+          const filtered = leaderboard.filter(user => user.username.toLowerCase().includes(query));
+          
+          document.getElementById('visible-count').textContent = filtered.length;
+          
+          // 1. Render podium (only when no search query is active and we have players)
+          if (!query && filtered.length > 0) {
+              podiumContainer.style.display = 'flex';
+              
+              // Sort top 3: we need rank 2, 1, 3 for visual display
+              const rank1 = filtered.find(u => u.rank === 1);
+              const rank2 = filtered.find(u => u.rank === 2);
+              const rank3 = filtered.find(u => u.rank === 3);
+              
+              let podiumHTML = '';
+              
+              // Rank 2 (Left)
+              if (rank2) {
+                  podiumHTML += `
+                      <div class="podium-card rank-2">
+                        <div class="podium-rank-num"># 2</div>
+                        <div class="podium-avatar" style="background: ${rank2.avatar_style}">${rank2.avatar}</div>
+                        <div class="podium-handle">${rank2.username}</div>
+                        <div class="podium-score">${rank2.score.toLocaleString()}</div>
+                        <div class="podium-score-label">Total Points</div>
+                        <div class="podium-divider"></div>
+                        <div class="podium-stats">
+                          <div class="pstat"><div class="pstat-num">${rank2.solves}</div><div class="pstat-label">Flags</div></div>
+                          <div class="pstat"><div class="pstat-num">100%</div><div class="pstat-label">Accuracy</div></div>
+                          <div class="pstat"><div class="pstat-num">1d</div><div class="pstat-label">Streak</div></div>
+                        </div>
+                      </div>
+                  `;
+              }
+              
+              // Rank 1 (Center)
+              if (rank1) {
+                  podiumHTML += `
+                      <div class="podium-card rank-1">
+                        <span class="podium-badge badge-streak">🔥 LEADER</span>
+                        <div class="podium-crown">👑</div>
+                        <div class="podium-rank-num"># 1</div>
+                        <div class="podium-avatar" style="background: ${rank1.avatar_style}">${rank1.avatar}</div>
+                        <div class="podium-handle">${rank1.username}</div>
+                        <div class="podium-score">${rank1.score.toLocaleString()}</div>
+                        <div class="podium-score-label">Total Points</div>
+                        <div class="podium-divider"></div>
+                        <div class="podium-stats">
+                          <div class="pstat"><div class="pstat-num">${rank1.solves}</div><div class="pstat-label">Flags</div></div>
+                          <div class="pstat"><div class="pstat-num">100%</div><div class="pstat-label">Accuracy</div></div>
+                          <div class="pstat"><div class="pstat-num">1d</div><div class="pstat-label">Streak</div></div>
+                        </div>
+                      </div>
+                  `;
+              }
+              
+              // Rank 3 (Right)
+              if (rank3) {
+                  podiumHTML += `
+                      <div class="podium-card rank-3">
+                        <div class="podium-rank-num"># 3</div>
+                        <div class="podium-avatar" style="background: ${rank3.avatar_style}">${rank3.avatar}</div>
+                        <div class="podium-handle">${rank3.username}</div>
+                        <div class="podium-score">${rank3.score.toLocaleString()}</div>
+                        <div class="podium-score-label">Total Points</div>
+                        <div class="podium-divider"></div>
+                        <div class="podium-stats">
+                          <div class="pstat"><div class="pstat-num">${rank3.solves}</div><div class="pstat-label">Flags</div></div>
+                          <div class="pstat"><div class="pstat-num">100%</div><div class="pstat-label">Accuracy</div></div>
+                          <div class="pstat"><div class="pstat-num">1d</div><div class="pstat-label">Streak</div></div>
+                        </div>
+                      </div>
+                  `;
+              }
+              
+              podiumContainer.innerHTML = podiumHTML;
+          } else {
+              podiumContainer.style.display = 'none';
+          }
+          
+          // 2. Render table rows
+          const maxScore = leaderboard.length > 0 ? leaderboard[0].score : 0;
+          
+          rowsContainer.innerHTML = filtered.map(user => `
+              <div class="lb-row ${user.username === currentUsername ? 'is-me' : ''}" data-handle="${user.username}" style="animation-delay:.03s">
+                  <div class="col-rank">
+                    <span class="rank-num ${user.rank === 1 ? 'rank-gold' : user.rank === 2 ? 'rank-silver' : user.rank === 3 ? 'rank-bronze' : 'rank-normal'}">${user.rank}</span>
+                    <span class="rank-change rc-same">—</span>
+                  </div>
+                  <div class="col-player">
+                    <div class="row-avatar" style="background:${user.avatar_style}">${user.avatar}</div>
+                    <div class="player-info">
+                      <div class="player-handle">${user.username} ${user.username === currentUsername ? '<span class="me-tag">YOU</span>' : ''}</div>
+                      <div class="player-sub">${user.solves} solved challenges</div>
+                    </div>
+                  </div>
+                  <div class="col-center col-flags">${user.solves}</div>
+                  <div class="col-center col-accuracy">100%</div>
+                  <div class="col-center col-streak"><span class="streak-num">1</span><span class="streak-fire">🔥</span></div>
+                  <div class="col-score">
+                    <div class="score-pts">${user.score.toLocaleString()}</div>
+                    <div class="score-bar-wrap">
+                      <div class="score-bar" style="width:${maxScore > 0 ? (user.score / maxScore * 100) : 0}%"></div>
+                    </div>
+                  </div>
+              </div>
+          `).join("");
+      }
+
+      // Initial load
+      updateStats();
+      updateLeaderboard();
+
+      // Poll every 3 seconds
+      setInterval(updateStats, 3000);
+      setInterval(updateLeaderboard, 3000);
+      
+      if (searchInput) {
+          searchInput.addEventListener('input', renderLeaderboard);
+      }
+  });
+  </script>
+<script>
+(function() {
+  const btn = document.getElementById('mobileMenuBtn');
+  const dropdown = document.getElementById('mobileDropdown');
+  const overlay = document.getElementById('mobileMenuOverlay');
+  if (!btn || !dropdown || !overlay) return;
+  function openMenu() { dropdown.classList.add('open'); overlay.classList.add('open'); }
+  function closeMenu() { dropdown.classList.remove('open'); overlay.classList.remove('open'); }
+  btn.addEventListener('click', function(e) { e.stopPropagation(); dropdown.classList.contains('open') ? closeMenu() : openMenu(); });
+  overlay.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeMenu(); });
+})();
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
