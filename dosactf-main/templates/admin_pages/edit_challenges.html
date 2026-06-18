@@ -402,6 +402,29 @@
         gap: 20px;
         align-items: start;
       }
+      /* Mobile: single panel view */
+      .mobile-back-btn {
+        display: none;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--primary);
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 11px;
+        padding: 8px 14px;
+        cursor: pointer;
+        margin-bottom: 12px;
+        width: 100%;
+        text-align: left;
+        transition: border-color 0.2s;
+      }
+      .mobile-back-btn:hover { border-color: var(--primary); }
+      @media (max-width: 900px) {
+        .mobile-back-btn { display: block; }
+        .two-col { grid-template-columns: 1fr; }
+        .form-row2 { grid-template-columns: 1fr; }
+        #chalListPanel.mobile-hidden { display: none !important; }
+        #editPanel.mobile-hidden { display: none !important; }
+      }
       .panel {
         background: var(--bg2);
         border: 1px solid var(--border);
@@ -744,14 +767,7 @@
         transform: translateY(0);
         opacity: 1;
       }
-      @media (max-width: 900px) {
-        .two-col {
-          grid-template-columns: 1fr;
-        }
-        .form-row2 {
-          grid-template-columns: 1fr;
-        }
-      }
+      /* already handled above */
       .file-drop.dragover {
         border-color: var(--accent) !important;
         background: rgba(255, 122, 48, 0.08) !important;
@@ -788,7 +804,48 @@
         body { cursor: auto !important; }
       }
     </style>
+
+    <style>
+      /* Perfect Mobile Interface Overrides */
+      @media (max-width: 768px) {
+        .topbar { flex-direction: column !important; height: auto !important; padding: 15px !important; gap: 15px !important; }
+        .topbar-right { width: 100% !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 10px !important; }
+        .topbar-brand { font-size: 1.2rem !important; }
+        .topbar-page { font-size: 0.9rem !important; }
+        .main-content { padding: 10px !important; }
+        .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; }
+        .page-header-right { width: 100% !important; justify-content: flex-start !important; }
+        .panel, .stat-card, .data-card, .user-card, .challenge-card { width: 100% !important; }
+      }
+    </style>
+
+    <style>
+      /* ── DISABLE ANIMATED CURSOR (ADMIN PAGES) ── */
+      #cursor-outer, #cursor-inner, #cursor-sword, .trail-particle, .click-spark, .floating-orb {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      * { cursor: default !important; }
+      a, button, [onclick], select, label, input[type="submit"], .topbar-icon-btn, .btn-panel, .btn-outline, .manage-list li, .pwd-toggle-btn {
+        cursor: pointer !important;
+      }
+      /* ── SMOOTH SCROLL + TRANSITIONS ── */
+      html { scroll-behavior: smooth; }
+      body { transition: none !important; }
+      .panel, .stat-card, .mini-stat, .data-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+      }
+      /* ── SMOOTH SCROLLBAR ── */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #111; }
+      ::-webkit-scrollbar-thumb { background: rgba(217, 164, 65, 0.4); border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(217, 164, 65, 0.7); }
+    </style>
+
 </head>
+
   <body>
     <div id="cursor-outer"></div>
     <div id="cursor-inner"></div>
@@ -807,7 +864,7 @@
           <div class="notif-badge">3</div>
         </div>
         <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
-        <a href="/logout" class="topbar-icon-btn" title="Logout" style="color: var(--red); border-color: rgba(255, 59, 59, 0.22); text-decoration: none;">⏻</a>
+        <a href="/logout" class="btn btn-outline-danger btn-sm d-flex align-items-center" title="Logout" style="text-decoration: none; padding: 4px 10px; font-family: 'Share Tech Mono', monospace; font-weight: bold; border-color: rgba(255, 59, 59, 0.4);">⏻ LOGOUT</a>
         <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
           <div class="profile-avatar">AD</div>
           <span class="profile-name">Admin</span>
@@ -837,37 +894,25 @@
 
       <div class="two-col">
         <!-- CHALLENGE LIST -->
-        <div class="panel">
+        <div class="panel" id="chalListPanel">
           <div class="anim-bar"></div>
           <div class="panel-head">
             <div class="panel-title">
               <div class="panel-dot"></div>
               All Challenges
             </div>
-            <span
-              style="
-                font-family: &quot;Share Tech Mono&quot;, monospace;
-                font-size: 10px;
-                color: var(--muted);
-              "
-              id="chalCount"
-              >52</span
-            >
+            <span style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted);" id="chalCount">0</span>
           </div>
           <div class="panel-body">
             <div class="chal-search">
-              <input
-                id="chalSearch"
-                placeholder="Search challenges..."
-                oninput="filterChals()"
-              />
+              <input id="chalSearch" placeholder="Search challenges..." oninput="filterChals()" />
             </div>
             <div class="chal-list" id="chalList"></div>
           </div>
         </div>
 
         <!-- EDIT FORM -->
-        <div class="edit-panel" id="editPanel">
+        <div class="edit-panel" id="editPanel" style="display:none;">
           <div class="panel" style="height: 100%">
             <div class="anim-bar"></div>
             <div class="panel-head" id="editHead">
@@ -876,7 +921,11 @@
                 Select a Challenge
               </div>
             </div>
-            <div id="emptyState">
+            <!-- Mobile Back Button -->
+            <div style="padding: 12px 18px 0;">
+              <button class="mobile-back-btn" id="mobileBackBtn" onclick="mobileBackToList()">← Back to Challenge List</button>
+            </div>
+            <div id="emptyState" style="display:none;">
               <div class="empty-state">
                 <div class="empty-icon">✎</div>
                 <div class="empty-text">
@@ -884,7 +933,7 @@
                 </div>
               </div>
             </div>
-            <div id="editForm" style="display: none">
+            <div id="editForm">
               <div class="form-section">
                 <div class="section-label">Basic Info</div>
                 <div class="form-row2">
@@ -947,13 +996,17 @@
               <div class="form-section">
                 <div class="section-label">Flag & Security</div>
                 <div class="form-group">
-                  <label class="form-label">Flag</label
-                  ><input
-                    class="form-input"
-                    id="eFlag"
-                    type="password"
-                    placeholder="FLAG{...}"
-                  />
+                  <label class="form-label">Flag</label>
+                  <div style="position: relative;">
+                    <input
+                      class="form-input"
+                      id="eFlag"
+                      type="password"
+                      placeholder="FLAG{...}"
+                      style="padding-right: 70px;"
+                    />
+                    <span onclick="toggleEditFlag()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none; letter-spacing: 1px;" id="eFlagToggleBtn">SHOW</span>
+                   </div>
                 </div>
               </div>
               <div class="form-section">
@@ -1022,8 +1075,9 @@
     <div class="toast" id="toast">✓ Challenge updated</div>
 
     <script>
-      let challenges = [];
-      let filtered = [];
+      // ── Load challenges from server-rendered data (no AJAX needed) ──
+      let challenges = {{ challenges | tojson | safe }};
+      let filtered = [...challenges];
       let selectedChal = null;
 
       function loadChallenges() {
@@ -1036,16 +1090,17 @@
               renderList(filtered);
               if (selectedChal) {
                 const updated = challenges.find(c => c.id === selectedChal.id);
-                if (updated) {
-                  selectChal(updated.id);
-                } else {
-                  clearEdit();
-                }
+                if (updated) { selectChal(updated.id); }
+                else { clearEdit(); }
               }
             }
-          });
+          })
+          .catch(err => console.warn('Refresh failed, using cached data'));
       }
-      loadChallenges();
+      // Initial render from server data
+      renderList(filtered);
+
+
 
       function diffColor(d) {
         return d === "Easy"
@@ -1077,11 +1132,11 @@
 
       function selectChal(id) {
         selectedChal = challenges.find((c) => c.id === id);
+        // Show the edit panel, populate fields
+        document.getElementById('editPanel').style.display = 'block';
         document.getElementById("emptyState").style.display = "none";
         document.getElementById("editForm").style.display = "block";
-        document
-          .getElementById("editHead")
-          .querySelector(".panel-title").innerHTML =
+        document.getElementById("editHead").querySelector(".panel-title").innerHTML =
           `<div class="panel-dot"></div>Editing: ${selectedChal.name}`;
         document.getElementById("eName").value = selectedChal.name;
         document.getElementById("ePoints").value = selectedChal.pts;
@@ -1104,20 +1159,14 @@
                 div.style.marginBottom = '10px';
                 div.innerHTML = `<span class="hint-num" style="min-width: 30px;">H${idx + 1}</span>
                                  <input class="form-input e-hint-input" value="${h.text}" placeholder="Hint text..." style="flex: 1;">
-                                 <input class="form-input e-hint-cost" type="number" value="${h.cost}" placeholder="Cost" style="width: 120px;">`;
+                                 <input class="form-input e-hint-cost" type="number" value="${h.cost}" placeholder="Cost" style="width: 80px;">`;
                 eHintList.appendChild(div);
             });
         }
         
         document.getElementById("eSolves").textContent = selectedChal.solves;
-        if (window.innerWidth <= 900) {
-          document.getElementById("editForm").scrollIntoView({ behavior: 'smooth' });
-        }
-        document.getElementById("eAttemptStat").textContent =
-          selectedChal.attempts;
-        const pct = Math.round(
-          (selectedChal.solves / selectedChal.attempts) * 100,
-        );
+        document.getElementById("eAttemptStat").textContent = selectedChal.attempts;
+        const pct = Math.round((selectedChal.solves / (selectedChal.attempts || 1)) * 100);
         document.getElementById("eSolveBar").style.width = pct + "%";
         
         // Reset file dropzone UI
@@ -1130,7 +1179,21 @@
         const fileInput = document.getElementById('eFileInput');
         if (fileInput) fileInput.value = '';
         
+        // Mobile UX: hide list, show form
+        if (window.innerWidth <= 900) {
+          document.getElementById('chalListPanel').classList.add('mobile-hidden');
+          document.getElementById('mobileBackBtn').style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         filterChals();
+      }
+
+      function mobileBackToList() {
+        document.getElementById('chalListPanel').classList.remove('mobile-hidden');
+        document.getElementById('editPanel').style.display = 'none';
+        selectedChal = null;
+        renderList(filtered);
       }
 
       function filterChals() {
@@ -1224,6 +1287,21 @@
         t.textContent = msg;
         t.classList.add("show");
         setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      function toggleEditFlag() {
+        const inp = document.getElementById('eFlag');
+        const btn = document.getElementById('eFlagToggleBtn');
+        if (!inp || !btn) return;
+        if (inp.type === 'password') {
+          inp.type = 'text';
+          btn.textContent = 'HIDE';
+          btn.style.color = 'var(--accent)';
+        } else {
+          inp.type = 'password';
+          btn.textContent = 'SHOW';
+          btn.style.color = 'var(--primary)';
+        }
       }
 
       renderList(challenges);
@@ -1397,5 +1475,28 @@
       });
     </script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Disable animated cursor on all admin pages
+      window.__cursorDisabled = true;
+      document.addEventListener('DOMContentLoaded', function() {
+        ['cursor-outer','cursor-inner','cursor-sword'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) { el.style.display = 'none'; el.style.visibility = 'hidden'; }
+        });
+        // Remove all trail particles if any appear
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(m) {
+            m.addedNodes.forEach(function(node) {
+              if (node.classList && (node.classList.contains('trail-particle') || node.classList.contains('click-spark') || node.classList.contains('floating-orb'))) {
+                node.remove();
+              }
+            });
+          });
+        });
+        observer.observe(document.body, { childList: true });
+      });
+    </script>
+
 </body>
 </html>
