@@ -12,9 +12,14 @@ def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
+            # Return JSON for API routes, redirect for page routes
+            if request.path.startswith('/api/'):
+                return jsonify({'success': False, 'error': 'Not authenticated'}), 401
             flash('Please log in to continue.', 'warning')
             return redirect(url_for('admin.admin_login'))
-        if session.get('role') != 'admin':
+        if session.get('role') not in ('admin', 'super_admin'):
+            if request.path.startswith('/api/'):
+                return jsonify({'success': False, 'error': 'Admin access only'}), 403
             flash('Admin access only.', 'danger')
             return redirect(url_for('dashboard'))
         return f(*args, **kwargs)
@@ -45,7 +50,7 @@ def admin_login():
             conn = get_db()
             cur  = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute(
-                'SELECT * FROM users WHERE username=%s OR email=%s LIMIT 1',
+                'SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style, s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN user_status s ON u.id = s.user_id WHERE u.username=%s OR u.email=%s LIMIT 1',
                 (identifier, identifier)
             )
             user = cur.fetchone()
@@ -70,7 +75,7 @@ def admin_login():
             try:
                 conn = get_db()
                 cur  = conn.cursor()
-                cur.execute('UPDATE users SET last_login=CURRENT_TIMESTAMP WHERE id=%s', (user['id'],))
+                cur.execute('UPDATE user_status SET last_login=CURRENT_TIMESTAMP WHERE user_id=%s', (user['id'],))
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -153,7 +158,7 @@ def admin_profile():
     user_id = session.get('user_id')
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    cur.execute("SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style, s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN user_status s ON u.id = s.user_id WHERE u.id = %s", (user_id,))
     user = cur.fetchone()
     cur.close()
     conn.close()
@@ -208,8 +213,12 @@ def admin_settings():
                     flash('Email is required.', 'danger')
                 else:
                     cur.execute(
-                        'UPDATE users SET display_name = %s, email = %s WHERE id = %s',
-                        (display_name, email, user_id)
+                        'UPDATE user_profiles SET display_name = %s WHERE user_id = %s',
+                        (display_name, user_id)
+                    )
+                    cur.execute(
+                        'UPDATE users SET email = %s WHERE id = %s',
+                        (email, user_id)
                     )
                     conn.commit()
                     session['display_name'] = display_name or session['username']
@@ -237,7 +246,7 @@ def admin_settings():
                     else:
                         flash('Incorrect current password.', 'danger')
         # Fetch current user data
-        cur.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+        cur.execute("SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style, s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN user_status s ON u.id = s.user_id WHERE u.id = %s", (user_id,))
         user = cur.fetchone()
         
         # Fetch platform settings
@@ -301,10 +310,56 @@ def api_admin_notify():
         return jsonify({'success': False, 'message': 'Database error'})
 
 
-@admin_bp.route('/edit-challenges')
+@admin_bp.route('/edit-challenges', methods=['GET', 'POST'])
 @admin_required
 def edit_challenges():
-    return render_template('admin_pages/edit_challenges.html')
+    from app import get_db
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT c.*,
+                   (SELECT COUNT(*) FROM solves s WHERE s.challenge_id = c.id) AS solve_count
+            FROM challenges c ORDER BY c.id
+        ''')
+        rows = cur.fetchall()
+        cur.execute('SELECT * FROM hints')
+        hints_rows = cur.fetchall()
+        hints_by_chal = {}
+        for h in hints_rows:
+            cid = h['challenge_id']
+            if cid not in hints_by_chal:
+                hints_by_chal[cid] = []
+            hints_by_chal[cid].append({'text': h['hint_text'], 'cost': h['cost']})
+        cur.close()
+        conn.close()
+
+        challenges = []
+        for r in rows:
+            cat = r['category']
+            if cat in ['Rev', 'Reverse', 'Reversing']:
+                cat = 'Reversing'
+            icon_map = {'Web': '🌐', 'Pwn': '💀', 'Crypto': '🔐', 'Forensics': '🔍', 'Reversing': '🔄', 'Misc': '🎲'}
+            icon = icon_map.get(cat, '🎲')
+            challenges.append({
+                'id': r['id'],
+                'name': r['title'],
+                'cat': cat,
+                'icon': icon,
+                'diff': r['difficulty'],
+                'pts': r['points'],
+                'solves': r['solve_count'],
+                'attempts': r['solve_count'] + 5,
+                'desc': r['description'] or '',
+                'flag': r['flag'],
+                'file_url': r['file_url'] or '',
+                'hints': hints_by_chal.get(r['id'], [])
+            })
+    except Exception as e:
+        challenges = []
+        flash(f'Error loading challenges: {e}', 'danger')
+
+    return render_template('admin_pages/edit_challenges.html', challenges=challenges)
 
 
 @admin_bp.route('/remove-challenges')
@@ -509,8 +564,8 @@ def admin_delete_challenge(challenge_id):
         
         # Deduct points from users who solved it
         cur.execute('''
-            UPDATE users SET score = score - %s 
-            WHERE id IN (SELECT user_id FROM solves WHERE challenge_id = %s)
+            UPDATE user_profiles SET score = score - %s 
+            WHERE user_id IN (SELECT user_id FROM solves WHERE challenge_id = %s)
         ''', (challenge_points, challenge_id))
         
         cur.execute('DELETE FROM challenges WHERE id=%s', (challenge_id,))
@@ -575,9 +630,11 @@ def admin_get_users():
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute('''
-            SELECT id, username, email, role, status, score, created_at, avatar, is_online, last_logout
-            FROM users
-            ORDER BY score DESC, id ASC
+            SELECT u.id, u.username, u.email, u.role, u.status, p.score, u.created_at, p.avatar, s.is_online, s.last_logout
+            FROM users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id
+            LEFT JOIN user_status s ON u.id = s.user_id
+            ORDER BY p.score DESC, u.id ASC
         ''')
         rows = cur.fetchall()
         cur.close()

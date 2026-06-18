@@ -50,10 +50,30 @@ def init_db():
             password   VARCHAR(255) NOT NULL,
             role       TEXT         NOT NULL DEFAULT 'player',
             status     TEXT         NOT NULL DEFAULT 'active',
-            score      INTEGER      NOT NULL DEFAULT 0,
-            avatar     VARCHAR(4)   DEFAULT NULL,
-            created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-            last_login TIMESTAMP    DEFAULT NULL
+            created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+        );
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            user_id      INTEGER      PRIMARY KEY,
+            display_name VARCHAR(100) DEFAULT NULL,
+            score        INTEGER      NOT NULL DEFAULT 0,
+            avatar       VARCHAR(4)   DEFAULT NULL,
+            avatar_style VARCHAR(255) DEFAULT 'linear-gradient(135deg, #1a0a3a, var(--blue))',
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS user_status (
+            user_id          INTEGER   PRIMARY KEY,
+            last_login       TIMESTAMP DEFAULT NULL,
+            last_logout      TIMESTAMP DEFAULT NULL,
+            is_online        BOOLEAN   DEFAULT FALSE,
+            reset_otp        VARCHAR(6) DEFAULT NULL,
+            reset_otp_expiry TIMESTAMP DEFAULT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
     ''')
 
@@ -172,15 +192,7 @@ def init_db():
     if cur.fetchone()[0] == 0:
         cur.execute('INSERT INTO platform_settings (id) VALUES (1)')
         
-    # Attempt to add online tracking columns
-    try:
-        cur.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_logout TIMESTAMP DEFAULT NULL;')
-        cur.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_online BOOLEAN DEFAULT FALSE;')
-        cur.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp VARCHAR(6) DEFAULT NULL;')
-        cur.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_expiry TIMESTAMP DEFAULT NULL;')
-        conn.commit()
-    except Exception:
-        conn.rollback()
+    # Online tracking is now handled by user_status table. No ALTER TABLE needed.
 
     # Attempt to add points_earned to solves for Score Persistence
     try:
@@ -368,7 +380,7 @@ def forgot_password():
                     otp = ''.join(random.choices(string.digits, k=6))
                     expiry = datetime.now() + timedelta(minutes=15)
                     
-                    cur.execute('UPDATE users SET reset_otp = %s, reset_otp_expiry = %s WHERE id = %s',
+                    cur.execute('UPDATE user_status SET reset_otp = %s, reset_otp_expiry = %s WHERE user_id = %s',
                                 (otp, expiry, user[0]))
                     
                     cur.execute('INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (%s, %s, %s, %s)', 
@@ -408,14 +420,14 @@ def verify_otp():
         try:
             conn = get_db()
             cur = conn.cursor(cursor_factory=RealDictCursor)
-            cur.execute('SELECT id, reset_otp, reset_otp_expiry FROM users WHERE email = %s', (email,))
+            cur.execute('SELECT u.id, s.reset_otp, s.reset_otp_expiry FROM users u JOIN user_status s ON u.id = s.user_id WHERE u.email = %s', (email,))
             user = cur.fetchone()
             
             if user and user['reset_otp'] == otp:
                 if user['reset_otp_expiry'] and user['reset_otp_expiry'] > datetime.now():
                     session['reset_user_id'] = user['id']
                     # clear OTP
-                    cur.execute('UPDATE users SET reset_otp = NULL, reset_otp_expiry = NULL WHERE id = %s', (user['id'],))
+                    cur.execute('UPDATE user_status SET reset_otp = NULL, reset_otp_expiry = NULL WHERE user_id = %s', (user['id'],))
                     conn.commit()
                     cur.close()
                     conn.close()
@@ -509,10 +521,20 @@ def register():
             conn = get_db()
             cur  = conn.cursor()
             cur.execute(
-                'INSERT INTO users (username, email, password, avatar) VALUES (%s, %s, %s, %s) RETURNING id',
-                (username, email, hashed, avatar)
+                'INSERT INTO users (username, email, password) VALUES (%s, %s, %s) RETURNING id',
+                (username, email, hashed)
             )
             user_id = cur.fetchone()[0]
+            
+            cur.execute(
+                'INSERT INTO user_profiles (user_id, avatar) VALUES (%s, %s)',
+                (user_id, avatar)
+            )
+            
+            cur.execute(
+                'INSERT INTO user_status (user_id) VALUES (%s)',
+                (user_id,)
+            )
             conn.commit()
             cur.close()
             conn.close()
@@ -553,7 +575,7 @@ def login():
             conn = get_db()
             cur  = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute(
-                'SELECT * FROM users WHERE username=%s OR email=%s LIMIT 1',
+                'SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style, s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN user_status s ON u.id = s.user_id WHERE u.username=%s OR u.email=%s LIMIT 1',
                 (identifier, identifier)
             )
             user = cur.fetchone()
@@ -573,7 +595,7 @@ def login():
             try:
                 conn = get_db()
                 cur  = conn.cursor()
-                cur.execute('UPDATE users SET last_login=CURRENT_TIMESTAMP, is_online=TRUE WHERE id=%s', (user['id'],))
+                cur.execute('UPDATE user_status SET last_login=CURRENT_TIMESTAMP, is_online=TRUE WHERE user_id=%s', (user['id'],))
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -617,7 +639,7 @@ def logout():
         try:
             conn = get_db()
             cur = conn.cursor()
-            cur.execute('UPDATE users SET is_online=FALSE, last_logout=CURRENT_TIMESTAMP WHERE id=%s', (user_id,))
+            cur.execute('UPDATE user_status SET is_online=FALSE, last_logout=CURRENT_TIMESTAMP WHERE user_id=%s', (user_id,))
             conn.commit()
             cur.close()
             conn.close()
@@ -651,7 +673,7 @@ def user_settings():
                 if not avatar:
                     flash('Avatar initials cannot be empty.', 'danger')
                 else:
-                    cur.execute('UPDATE users SET avatar = %s, avatar_style = %s WHERE id = %s', (avatar, avatar_style, user_id))
+                    cur.execute('UPDATE user_profiles SET avatar = %s, avatar_style = %s WHERE user_id = %s', (avatar, avatar_style, user_id))
                     conn.commit()
                     session['avatar'] = avatar
                     session['avatar_style'] = avatar_style
@@ -683,8 +705,12 @@ def user_settings():
                     flash('Email is required.', 'danger')
                 else:
                     cur.execute(
-                        'UPDATE users SET display_name = %s, email = %s WHERE id = %s',
-                        (display_name, email, user_id)
+                        'UPDATE user_profiles SET display_name = %s WHERE user_id = %s',
+                        (display_name, user_id)
+                    )
+                    cur.execute(
+                        'UPDATE users SET email = %s WHERE id = %s',
+                        (email, user_id)
                     )
                     conn.commit()
                     # Update session
@@ -692,7 +718,7 @@ def user_settings():
                     flash('Profile updated successfully!', 'success')
                 
         # Fetch current user data
-        cur.execute('SELECT username, email, display_name, avatar_style FROM users WHERE id = %s', (user_id,))
+        cur.execute('SELECT u.username, u.email, p.display_name, p.avatar_style FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.id = %s', (user_id,))
         user = cur.fetchone()
         cur.close()
         conn.close()
@@ -754,7 +780,7 @@ def challenges():
     try:
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute('SELECT score FROM users WHERE id = %s', (user_id,))
+        cur.execute('SELECT score FROM user_profiles WHERE user_id = %s', (user_id,))
         row = cur.fetchone()
         if row:
             score = row['score']
@@ -910,7 +936,7 @@ def unlock_hint():
             return jsonify({'success': True, 'text': hint['hint_text'], 'message': 'Already unlocked'})
             
         # Get user score
-        cur.execute('SELECT score FROM users WHERE id = %s', (user_id,))
+        cur.execute('SELECT score FROM user_profiles WHERE user_id = %s', (user_id,))
         user_row = cur.fetchone()
         current_score = user_row['score']
         
@@ -919,7 +945,7 @@ def unlock_hint():
         # We will just deduct it. Or maybe prevent if score < cost? Let's just deduct it.
         
         # Deduct score and record unlock
-        cur.execute('UPDATE users SET score = score - %s WHERE id = %s', (cost, user_id))
+        cur.execute('UPDATE user_profiles SET score = score - %s WHERE user_id = %s', (cost, user_id))
         cur.execute('INSERT INTO user_hints (user_id, hint_id) VALUES (%s, %s)', (user_id, hint_id))
         
         conn.commit()
@@ -969,7 +995,7 @@ def submit_flag():
                 # Fallback if column points_earned doesn't exist yet (migration error)
                 cur.execute('INSERT INTO solves (user_id, challenge_id) VALUES (%s, %s)', (user_id, challenge_id))
             
-            cur.execute('UPDATE users SET score = score + %s WHERE id = %s', (challenge['points'], user_id))
+            cur.execute('UPDATE user_profiles SET score = score + %s WHERE user_id = %s', (challenge['points'], user_id))
             
             # Log activity
             try:
@@ -1012,7 +1038,7 @@ def get_stats():
         total_users = cur.fetchone()[0]
         
         # Total score of all players
-        cur.execute("SELECT SUM(score) FROM users WHERE role = 'player'")
+        cur.execute("SELECT SUM(p.score) FROM users u JOIN user_profiles p ON u.id = p.user_id WHERE u.role = 'player'")
         total_score_row = cur.fetchone()
         total_score = total_score_row[0] if total_score_row and total_score_row[0] is not None else 0
         
@@ -1029,11 +1055,11 @@ def get_stats():
         user_solves = cur.fetchone()[0]
         
         # 5. User score & rank
-        cur.execute("SELECT score FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT score FROM user_profiles WHERE user_id = %s", (user_id,))
         user_score_row = cur.fetchone()
         user_score = user_score_row[0] if user_score_row else 0
         
-        cur.execute("SELECT COUNT(*) + 1 FROM users WHERE role = 'player' AND score > %s", (user_score,))
+        cur.execute("SELECT COUNT(*) + 1 FROM users u JOIN user_profiles p ON u.id = p.user_id WHERE u.role = 'player' AND p.score > %s", (user_score,))
         user_rank = cur.fetchone()[0]
         
         cur.close()
@@ -1063,11 +1089,12 @@ def get_leaderboard_data():
         
         if period == 'overall':
             cur.execute('''
-                SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name, u.score, u.avatar, COALESCE(u.avatar_style, 'linear-gradient(135deg, #1a0a3a, var(--blue))') as avatar_style,
+                SELECT u.id, u.username, COALESCE(p.display_name, u.username) as display_name, p.score, p.avatar, COALESCE(p.avatar_style, 'linear-gradient(135deg, #1a0a3a, var(--blue))') as avatar_style,
                        (SELECT COUNT(*) FROM solves s WHERE s.user_id = u.id) AS solves
                 FROM users u
+                LEFT JOIN user_profiles p ON u.id = p.user_id
                 WHERE u.role = 'player'
-                ORDER BY u.score DESC, u.id ASC
+                ORDER BY p.score DESC, u.id ASC
             ''')
         else:
             time_filter = ""
@@ -1079,14 +1106,15 @@ def get_leaderboard_data():
                 time_filter = "AND s.solved_at >= date_trunc('month', CURRENT_DATE)"
                 
             query = f'''
-                SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name, u.avatar, COALESCE(u.avatar_style, 'linear-gradient(135deg, #1a0a3a, var(--blue))') as avatar_style,
+                SELECT u.id, u.username, COALESCE(p.display_name, u.username) as display_name, p.avatar, COALESCE(p.avatar_style, 'linear-gradient(135deg, #1a0a3a, var(--blue))') as avatar_style,
                        COALESCE(SUM(c.points), 0) AS score,
                        COUNT(s.challenge_id) AS solves
                 FROM users u
+                LEFT JOIN user_profiles p ON u.id = p.user_id
                 LEFT JOIN solves s ON s.user_id = u.id {time_filter}
                 LEFT JOIN challenges c ON c.id = s.challenge_id
                 WHERE u.role = 'player'
-                GROUP BY u.id, u.username, u.display_name, u.avatar, u.avatar_style
+                GROUP BY u.id, u.username, p.display_name, p.avatar, p.avatar_style
                 ORDER BY score DESC, u.id ASC
             '''
             cur.execute(query)
