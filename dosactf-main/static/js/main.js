@@ -14,7 +14,10 @@
   const inner = document.getElementById('cursor-inner');
   const sword = document.getElementById('cursor-sword');
 
-  if (outer && inner && !isMobile) {
+  const isAdminPath = window.location.pathname.startsWith('/admin') ||
+                      ['/add-challenge', '/edit-challenges', '/remove-challenges', '/view-users', '/ban-users', '/edit-user-role'].includes(window.location.pathname);
+
+  if (outer && inner && !isMobile && !window.__cursorDisabled && !isAdminPath) {
     let mouseX = -100, mouseY = -100;
     let outerX = -100, outerY = -100;
     let lastX = -100, lastY = -100;
@@ -209,5 +212,22 @@
     }, { threshold: 0.5 });
     statNums.forEach(el => countObserver.observe(el));
   }
+
+  // 5. DYNAMIC UNREAD NOTIFICATIONS BADGE
+  function updateTopbarNotificationBadge() {
+    const badge = document.getElementById('topbar-notif-badge');
+    if (!badge) return;
+    fetch('/api/notifications/unread-count')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          badge.textContent = data.count;
+          badge.style.display = data.count > 0 ? 'flex' : 'none';
+        }
+      })
+      .catch(err => console.error("Error updating notifications badge:", err));
+  }
+  updateTopbarNotificationBadge();
+  setInterval(updateTopbarNotificationBadge, 10000); // Check count every 10 seconds
 
 })();

@@ -191,6 +191,24 @@ def init_db():
     cur.execute('SELECT COUNT(*) FROM platform_settings')
     if cur.fetchone()[0] == 0:
         cur.execute('INSERT INTO platform_settings (id) VALUES (1)')
+
+    # Ensure new system/notification config columns exist on platform_settings
+    for col, col_type in [
+        ('maintenance_mode', 'BOOLEAN DEFAULT FALSE'),
+        ('debug_logging', 'BOOLEAN DEFAULT FALSE'),
+        ('rate_limiting', 'BOOLEAN DEFAULT TRUE'),
+        ('alert_suspicious', 'BOOLEAN DEFAULT TRUE'),
+        ('alert_registration', 'BOOLEAN DEFAULT FALSE'),
+        ('alert_milestones', 'BOOLEAN DEFAULT TRUE'),
+        ('alert_errors', 'BOOLEAN DEFAULT TRUE'),
+        ('enable_2fa', 'BOOLEAN DEFAULT TRUE'),
+        ('ip_whitelist', 'BOOLEAN DEFAULT FALSE'),
+        ('session_timeout', 'BOOLEAN DEFAULT TRUE')
+    ]:
+        try:
+            cur.execute(f"ALTER TABLE platform_settings ADD COLUMN IF NOT EXISTS {col} {col_type}")
+        except Exception:
+            pass
         
     # Online tracking is now handled by user_status table. No ALTER TABLE needed.
 
@@ -242,6 +260,23 @@ init_db()
 
 @app.before_request
 def check_user_status_and_role():
+    # 1. Maintenance Mode Check
+    bypass_maintenance = ['static', 'login', 'logout', 'admin.admin_login', 'maintenance']
+    if request.endpoint not in bypass_maintenance and session.get('role') != 'admin':
+        try:
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute('SELECT maintenance_mode FROM platform_settings WHERE id = 1')
+            row = cur.fetchone()
+            cur.close()
+            conn.close()
+            if row and row[0]: # maintenance_mode is True
+                if request.path.startswith('/api/'):
+                    return jsonify({'success': False, 'message': 'Platform is currently under maintenance.'}), 503
+                return redirect(url_for('maintenance'))
+        except Exception:
+            pass
+
     # Bypass verification for static assets and authentication pages
     bypass_endpoints = ['static', 'login', 'register', 'logout', 'admin.admin_login']
     if request.endpoint in bypass_endpoints:
@@ -749,6 +784,11 @@ def privacy():
     return render_template('pages/privacy.html')
 
 
+@app.route('/maintenance')
+def maintenance():
+    return render_template('pages/maintenance.html')
+
+
 @app.route('/notifications')
 @login_required
 def notifications():
@@ -1076,6 +1116,24 @@ def get_stats():
             'user_score': user_score,
             'user_rank': user_rank
         })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/notifications/unread-count', methods=['GET'])
+@login_required
+def get_unread_notifications_count():
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT COUNT(*) FROM notifications 
+            WHERE (user_id = %s OR user_id IS NULL) AND is_read = FALSE
+        ''', (session['user_id'],))
+        count = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return jsonify({'success': True, 'count': count})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 

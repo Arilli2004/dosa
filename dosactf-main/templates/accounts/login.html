@@ -414,17 +414,118 @@
       vertical-align: middle; margin-right: 6px;
     }
 
-    /* Responsive */
-    @media (max-width: 860px) {
-      .page { grid-template-columns: 1fr; }
-      .left-panel { display: none; }
-      .right-panel { padding: 32px 24px; }
+    /* ── MOBILE HEADER BAR (hidden on desktop) ── */
+    .mobile-header {
+      display: none;
     }
-  </style>
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .page {
+        grid-template-columns: 1fr;
+        min-height: 100vh;
+      }
+      .left-panel { display: none; }
+
+      /* Show mobile header */
+      .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px 24px 0;
+        text-decoration: none;
+      }
+      .mobile-header img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        border-radius: 6px;
+      }
+      .mobile-header-name {
+        font-family: 'Orbitron', monospace;
+        font-size: 20px;
+        font-weight: 900;
+        color: var(--primary);
+        text-shadow: var(--glow-sm);
+        letter-spacing: .04em;
+      }
+
+      .right-panel {
+        padding: 24px 20px 40px;
+        min-height: calc(100vh - 80px);
+        justify-content: flex-start;
+      }
+
+      .form-header { margin-bottom: 24px; }
+      .form-title  { font-size: 20px; }
+      .form-subtitle { font-size: 13px; }
+
+      /* Bigger touch targets for inputs */
+      .form-input {
+        padding: 14px 14px 14px 42px;
+        font-size: 14px;
+      }
+
+      /* Submit button full-width and taller */
+      .btn-submit {
+        padding: 16px 24px;
+        font-size: 13px;
+      }
+
+      /* Check row label bigger */
+      .check-lbl { font-size: 12px; }
+
+      /* enc / server-status smaller */
+      .enc-badge, .server-status { font-size: 8px; }
+    }
+
+    @media (max-width: 420px) {
+      .right-panel { padding: 20px 16px 36px; }
+      .form-title  { font-size: 18px; }
+      .mobile-header-name { font-size: 17px; }
+    }
+
+/* Theme Override for Option Dropdowns */
+select option, .form-select option, .filter-select option {
+    background: #181818 !important;
+    color: #F5E6C8 !important;
+}
+</style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-      /* OVERRIDE BOOTSTRAP */
+            /* OVERRIDE BOOTSTRAP */
+      .form-select, .form-control, .form-input, .form-textarea, .filter-select {
+        background-color: #181818 !important;
+        color: #F5E6C8 !important;
+        border-color: rgba(245, 230, 200, 0.08) !important;
+      }
+      .form-select:focus, .form-control:focus, .form-input:focus, .form-textarea:focus, .filter-select:focus {
+        background-color: #0d0000 !important;
+        border-color: #D9A441 !important;
+        color: #F5E6C8 !important;
+        box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.18), 0 0 18px rgba(255, 59, 59, 0.25) !important;
+      }
+      .form-select option {
+        background-color: #181818 !important;
+        color: #F5E6C8 !important;
+      }
+      .toast {
+        background-color: #111111 !important;
+        color: #00e676 !important;
+        border: 1px solid #00e676 !important;
+        box-shadow: 0 0 20px rgba(0, 230, 118, 0.25) !important;
+        font-family: 'Share Tech Mono', monospace !important;
+        font-size: 11px !important;
+        letter-spacing: 1px !important;
+        opacity: 0;
+        transition: all 0.35s;
+      }
+      .toast.show {
+        opacity: 1 !important;
+      }
+
       body {
         background: #0A0A0A !important;
         background-color: #0A0A0A !important;
@@ -448,6 +549,12 @@
 
 <!-- Floating particles -->
 <div id="particles"></div>
+
+<!-- ── MOBILE HEADER (only visible on small screens) ── -->
+<a href="/" class="mobile-header">
+  <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo">
+  <span class="mobile-header-name">DOSA CTF</span>
+</a>
 
 <div class="page">
 
@@ -661,9 +768,12 @@
   const box = document.getElementById('remember-box');
   const chk = document.getElementById('remember-checkbox');
   if (!box || !chk) return;
-  box.parentElement.addEventListener('click', (e)=> {
-    if(e.target !== chk) chk.checked = !chk.checked;
-    if(chk.checked) box.classList.add('on');
+  
+  if (chk.checked) box.classList.add('on');
+  else box.classList.remove('on');
+
+  chk.addEventListener('change', () => {
+    if (chk.checked) box.classList.add('on');
     else box.classList.remove('on');
   });
 })();

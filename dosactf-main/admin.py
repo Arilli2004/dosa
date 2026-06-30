@@ -121,10 +121,10 @@ def admin_dashboard():
         
         # Recent admin logs
         cur.execute('''
-            SELECT al.action, al.target, al.created_at, u.username
+            SELECT al.action, al.target, al.logged_at AS created_at, u.username
             FROM admin_logs al
             LEFT JOIN users u ON al.user_id = u.id
-            ORDER BY al.created_at DESC LIMIT 10
+            ORDER BY al.logged_at DESC LIMIT 10
         ''')
         admin_logs = cur.fetchall()
         
@@ -158,11 +158,75 @@ def admin_profile():
     user_id = session.get('user_id')
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style, s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN user_status s ON u.id = s.user_id WHERE u.id = %s", (user_id,))
+    # Fetch admin user profile
+    cur.execute("""
+        SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style,
+               s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry
+        FROM users u
+        LEFT JOIN user_profiles p ON u.id = p.user_id
+        LEFT JOIN user_status s ON u.id = s.user_id
+        WHERE u.id = %s
+    """, (user_id,))
     user = cur.fetchone()
+
+    # Live platform stats
+    stats = {}
+    try:
+        cur.execute("SELECT COUNT(*) AS cnt FROM users")
+        stats['total_users'] = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM challenges")
+        stats['total_challenges'] = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM users WHERE status = 'banned'")
+        stats['total_bans'] = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM solves")
+        stats['total_solves'] = cur.fetchone()['cnt']
+
+        # Admin's own action count from admin_logs
+        cur.execute("SELECT COUNT(*) AS cnt FROM admin_logs WHERE user_id = %s", (user_id,))
+        stats['admin_actions'] = cur.fetchone()['cnt']
+
+        # Days active since account creation
+        if user and user.get('created_at'):
+            from datetime import datetime, timezone
+            created = user['created_at']
+            if hasattr(created, 'tzinfo') and created.tzinfo:
+                now = datetime.now(timezone.utc)
+            else:
+                now = datetime.utcnow()
+            stats['days_active'] = (now - created).days
+        else:
+            stats['days_active'] = 0
+
+        # Recent admin activity (real logs)
+        cur.execute("""
+            SELECT al.action, al.target, al.logged_at, u.username
+            FROM admin_logs al
+            LEFT JOIN users u ON al.user_id = u.id
+            ORDER BY al.logged_at DESC LIMIT 8
+        """)
+        recent_logs = cur.fetchall()
+        stats['recent_logs'] = [
+            {
+                'time': r['logged_at'].strftime('%H:%M') if r.get('logged_at') else '--:--',
+                'text': f"{r.get('action','').replace('_',' ').title()}: {r.get('target','')}"
+            }
+            for r in recent_logs
+        ]
+    except Exception:
+        stats.setdefault('total_users', 0)
+        stats.setdefault('total_challenges', 0)
+        stats.setdefault('total_bans', 0)
+        stats.setdefault('total_solves', 0)
+        stats.setdefault('admin_actions', 0)
+        stats.setdefault('days_active', 0)
+        stats.setdefault('recent_logs', [])
+
     cur.close()
     conn.close()
-    return render_template('admin_pages/admin_profile.html', user=user)
+    return render_template('admin_pages/admin_profile.html', user=user, stats=stats)
 
 
 @admin_bp.route('/admin-settings', methods=['GET', 'POST'])
@@ -204,6 +268,45 @@ def admin_settings():
                 from app import log_admin_action
                 log_admin_action(session['user_id'], 'Updated Settings', 'Platform Config')
                 
+            elif form_type == 'notifications':
+                alert_email = request.form.get('alert_email', '').strip()
+                webhook_url = request.form.get('webhook_url', '').strip()
+                alert_suspicious = 'alert_suspicious' in request.form
+                alert_registration = 'alert_registration' in request.form
+                alert_milestones = 'alert_milestones' in request.form
+                alert_errors = 'alert_errors' in request.form
+                
+                cur.execute('''
+                    UPDATE platform_settings SET 
+                    alert_email=%s, webhook_url=%s, alert_suspicious=%s, 
+                    alert_registration=%s, alert_milestones=%s, alert_errors=%s 
+                    WHERE id=1
+                ''', (alert_email, webhook_url, alert_suspicious, alert_registration, alert_milestones, alert_errors))
+                conn.commit()
+                flash('Notification settings updated successfully!', 'success')
+                
+                from app import log_admin_action
+                log_admin_action(session['user_id'], 'Updated Settings', 'Notification Alerts')
+                
+            elif form_type == 'system':
+                maintenance_mode = 'maintenance_mode' in request.form
+                debug_logging = 'debug_logging' in request.form
+                rate_limiting = 'rate_limiting' in request.form
+                auto_backup = request.form.get('auto_backup', 'Daily').strip()
+                retention = request.form.get('retention', '30 Days').strip()
+                
+                cur.execute('''
+                    UPDATE platform_settings SET 
+                    maintenance_mode=%s, debug_logging=%s, rate_limiting=%s, 
+                    auto_backup=%s, retention=%s 
+                    WHERE id=1
+                ''', (maintenance_mode, debug_logging, rate_limiting, auto_backup, retention))
+                conn.commit()
+                flash('System settings updated successfully!', 'success')
+                
+                from app import log_admin_action
+                log_admin_action(session['user_id'], 'Updated Settings', 'System Config')
+
             elif form_type == 'profile':
                 display_name = request.form.get('display_name', '').strip()
                 email = request.form.get('email', '').strip()
@@ -245,6 +348,23 @@ def admin_settings():
                         log_admin_action(session['user_id'], 'Updated Password', 'Security')
                     else:
                         flash('Incorrect current password.', 'danger')
+                        
+            elif form_type == 'security_settings':
+                enable_2fa = 'enable_2fa' in request.form
+                ip_whitelist = 'ip_whitelist' in request.form
+                session_timeout = 'session_timeout' in request.form
+                
+                cur.execute('''
+                    UPDATE platform_settings SET 
+                    enable_2fa=%s, ip_whitelist=%s, session_timeout=%s 
+                    WHERE id=1
+                ''', (enable_2fa, ip_whitelist, session_timeout))
+                conn.commit()
+                flash('Security configurations updated successfully!', 'success')
+                
+                from app import log_admin_action
+                log_admin_action(session['user_id'], 'Updated Settings', 'Security Configuration')
+                
         # Fetch current user data
         cur.execute("SELECT u.*, p.display_name, p.score, p.avatar, p.avatar_style, s.last_login, s.last_logout, s.is_online, s.reset_otp, s.reset_otp_expiry FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN user_status s ON u.id = s.user_id WHERE u.id = %s", (user_id,))
         user = cur.fetchone()
@@ -789,7 +909,7 @@ def admin_get_logs():
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute('''
-            SELECT u.username, al.action, al.target, al.logged_at
+            SELECT al.action, al.target, al.logged_at, u.username
             FROM admin_logs al
             LEFT JOIN users u ON al.user_id = u.id
             ORDER BY al.logged_at DESC
@@ -798,7 +918,7 @@ def admin_get_logs():
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        
+
         logs = []
         for r in rows:
             time_str = r['logged_at'].strftime('%H:%M') if r['logged_at'] else '--:--'
@@ -812,3 +932,232 @@ def admin_get_logs():
         return jsonify({'success': True, 'logs': logs})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+# ─────────────────────────────────────────────
+# ADMIN PROFILE LIVE STATS API
+# ─────────────────────────────────────────────
+@admin_bp.route('/api/admin/profile-stats', methods=['GET'])
+@admin_required
+def admin_profile_stats():
+    """Live stats endpoint polled every 30s by admin_profile.html"""
+    from app import get_db
+    from datetime import datetime, timezone
+    user_id = session.get('user_id')
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM users")
+        total_users = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM challenges")
+        total_challenges = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM users WHERE status = 'banned'")
+        total_bans = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM solves")
+        total_solves = cur.fetchone()['cnt']
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM admin_logs WHERE user_id = %s", (user_id,))
+        admin_actions = cur.fetchone()['cnt']
+
+        # Recent real activity logs
+        cur.execute("""
+            SELECT al.action, al.target, al.logged_at, u.username
+            FROM admin_logs al
+            LEFT JOIN users u ON al.user_id = u.id
+            ORDER BY al.logged_at DESC LIMIT 8
+        """)
+        recent_logs = cur.fetchall()
+        activity = [
+            {
+                'time': r['logged_at'].strftime('%H:%M') if r.get('logged_at') else '--:--',
+                'text': f"{r.get('action','').replace('_',' ').title()}: {r.get('target','')}"
+            }
+            for r in recent_logs
+        ]
+
+        cur.close()
+        conn.close()
+        return jsonify({
+            'success': True,
+            'total_users': total_users,
+            'total_challenges': total_challenges,
+            'total_bans': total_bans,
+            'total_solves': total_solves,
+            'admin_actions': admin_actions,
+            'activity': activity
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+# ─────────────────────────────────────────────
+# DANGER ZONE APIs
+# ─────────────────────────────────────────────
+
+def _log_admin_action(cur, user_id, action, target):
+    """Helper: insert a row into admin_logs."""
+    cur.execute(
+        "INSERT INTO admin_logs (user_id, action, target) VALUES (%s, %s, %s)",
+        (user_id, action, target)
+    )
+
+
+@admin_bp.route('/api/admin/danger/reset-leaderboard', methods=['POST'])
+@admin_required
+def danger_reset_leaderboard():
+    """
+    Reset Leaderboard — set every user_profile.score to 0.
+    Solve records are kept; only scores are zeroed.
+    """
+    from app import get_db
+    user_id = session.get('user_id')
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Zero out all scores
+        cur.execute("UPDATE user_profiles SET score = 0")
+        rows_affected = cur.rowcount
+
+        _log_admin_action(cur, user_id, 'reset_leaderboard',
+                          f'Zeroed {rows_affected} user score(s)')
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({
+            'success': True,
+            'message': f'Leaderboard reset. {rows_affected} scores cleared.'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@admin_bp.route('/api/admin/danger/purge-submissions', methods=['POST'])
+@admin_required
+def danger_purge_submissions():
+    """
+    Purge All Submissions — delete every row from the solves table.
+    Also zeros out scores since they were based on solves.
+    """
+    from app import get_db
+    user_id = session.get('user_id')
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Count before deleting for the log
+        cur.execute("SELECT COUNT(*) AS cnt FROM solves")
+        total = cur.fetchone()['cnt']
+
+        # Delete all solve records
+        cur.execute("DELETE FROM solves")
+
+        # Also zero scores (they were driven by solves)
+        cur.execute("UPDATE user_profiles SET score = 0")
+
+        # Reset hint unlocks too (they're tied to challenges/solves)
+        cur.execute("DELETE FROM user_hints")
+
+        _log_admin_action(cur, user_id, 'purge_submissions',
+                          f'Deleted {total} solve record(s) and reset all scores')
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({
+            'success': True,
+            'message': f'Purged {total} submission(s). Scores and hint unlocks reset.'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@admin_bp.route('/api/admin/danger/force-logout', methods=['POST'])
+@admin_required
+def danger_force_logout():
+    """
+    Force-Logout All Users — set is_online=FALSE for every user in user_status.
+    On their next request, check_user_status_and_role will see is_online=FALSE
+    and treat them as logged-out / require re-login.
+    We also clear their Flask session via a forced_logout flag in the DB.
+    """
+    from app import get_db
+    user_id = session.get('user_id')
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Count online users before action
+        cur.execute("SELECT COUNT(*) AS cnt FROM user_status WHERE is_online = TRUE")
+        online_count = cur.fetchone()['cnt']
+
+        # Mark everyone offline and record logout time
+        cur.execute("""
+            UPDATE user_status
+            SET is_online = FALSE,
+                last_logout = CURRENT_TIMESTAMP
+            WHERE user_id != %s
+        """, (user_id,))  # Keep the calling admin's own session alive
+
+        _log_admin_action(cur, user_id, 'force_logout_all',
+                          f'Force-logged out {online_count} active session(s)')
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({
+            'success': True,
+            'message': f'Force-logged out {online_count} active session(s).'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@admin_bp.route('/api/admin/danger/wipe-event', methods=['POST'])
+@admin_required
+def danger_wipe_event():
+    """
+    Wipe Event Data — deletes all challenges, all solves, all hint unlocks,
+    and resets every user score to 0.
+    Admin and non-admin user ACCOUNTS are preserved.
+    """
+    from app import get_db
+    user_id = session.get('user_id')
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Count for log
+        cur.execute("SELECT COUNT(*) AS cnt FROM challenges")
+        chall_count = cur.fetchone()['cnt']
+        cur.execute("SELECT COUNT(*) AS cnt FROM solves")
+        solve_count = cur.fetchone()['cnt']
+
+        # Delete in correct FK order:
+        # 1. hint unlocks (FK → hints → challenges)
+        cur.execute("DELETE FROM user_hints")
+        # 2. hints (FK → challenges)
+        cur.execute("DELETE FROM hints")
+        # 3. solves (FK → challenges)
+        cur.execute("DELETE FROM solves")
+        # 4. challenges themselves
+        cur.execute("DELETE FROM challenges")
+        # 5. reset all scores
+        cur.execute("UPDATE user_profiles SET score = 0")
+        # 6. clear notifications
+        cur.execute("DELETE FROM notifications")
+
+        _log_admin_action(cur, user_id, 'wipe_event_data',
+                          f'Deleted {chall_count} challenge(s), {solve_count} solve(s), reset all scores')
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({
+            'success': True,
+            'message': f'Event wiped: {chall_count} challenge(s) and {solve_count} solve(s) removed.'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+

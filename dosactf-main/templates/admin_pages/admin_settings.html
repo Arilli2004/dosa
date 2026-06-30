@@ -368,71 +368,85 @@
       .topbar-right {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
       }
-      .topbar-icon-btn {
+      /* ── UNIFIED TOP ACTION BUTTONS ── */
+      .topbar-action {
         position: relative;
-        width: 34px;
-        height: 34px;
-        border: 1px solid var(--border2);
-        background: var(--bg2);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
-        /* cursor none removed */
-        transition:
-          border-color 0.2s,
-          background 0.2s;
-        text-decoration: none;
-        color: var(--text);
-      }
-      .topbar-icon-btn:hover {
-        border-color: var(--primary);
-        background: rgba(255, 59, 59, 0.08);
-      }
-      .notif-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: var(--primary);
-        font-family: "Share Tech Mono", monospace;
-        font-size: 8px;
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 6px var(--primary);
-      }
-      .topbar-profile {
-        display: flex;
-        align-items: center;
         gap: 8px;
-        background: var(--bg2);
+        height: 38px;
+        padding: 0 16px;
         border: 1px solid var(--border2);
-        padding: 4px 12px 4px 6px;
-        /* cursor none removed */
-        transition: border-color 0.2s;
+        background: var(--bg2);
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: border-color 0.2s, background 0.2s, color 0.2s;
       }
-      .topbar-profile:hover {
+      .topbar-action:hover {
         border-color: var(--primary);
+        background: rgba(217, 164, 65, 0.10);
+        color: var(--primary);
       }
-      .profile-avatar {
-        width: 26px;
-        height: 26px;
+      .topbar-action .action-icon {
+        font-size: 15px;
+        line-height: 1;
+      }
+      /* Logout button gets red tint */
+      .topbar-action.logout-btn {
+        border-color: rgba(255, 59, 59, 0.35);
+        color: #ff5555;
+      }
+      .topbar-action.logout-btn:hover {
+        border-color: #ff3b3b;
+        background: rgba(255, 59, 59, 0.12);
+        color: #ff3b3b;
+      }
+      /* Profile button keeps avatar */
+      .topbar-action.profile-btn .profile-avatar {
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--secondary), var(--primary));
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: "Orbitron", monospace;
-        font-size: 9px;
+        font-size: 8px;
         font-weight: 700;
         border: 1px solid var(--border);
+        color: #1a1a1a;
+        flex-shrink: 0;
       }
+      /* Notification badge */
+      .notif-badge {
+        position: absolute;
+        top: 4px;
+        right: 8px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 8px;
+        color: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 6px var(--primary);
+        pointer-events: none;
+      }
+      /* Legacy aliases kept for compatibility */
+      .topbar-icon-btn { display: none; }
+      .topbar-profile  { display: none; }
       .profile-name {
         font-family: "Rajdhani", sans-serif;
         font-size: 13px;
@@ -625,6 +639,10 @@
         background-position: right 12px center;
         padding-right: 32px;
         /* cursor none removed */
+      }
+      .form-select option {
+        background: var(--bg3);
+        color: var(--text);
       }
       .form-input:focus,
       .form-select:focus,
@@ -887,11 +905,47 @@
           grid-template-columns: 1fr;
         }
       }
-    </style>
+    
+/* Theme Override for Option Dropdowns */
+select option, .form-select option, .filter-select option {
+    background: #181818 !important;
+    color: #F5E6C8 !important;
+}
+</style>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-      /* OVERRIDE BOOTSTRAP */
+            /* OVERRIDE BOOTSTRAP */
+      .form-select, .form-control, .form-input, .form-textarea, .filter-select {
+        background-color: #181818 !important;
+        color: #F5E6C8 !important;
+        border-color: rgba(245, 230, 200, 0.08) !important;
+      }
+      .form-select:focus, .form-control:focus, .form-input:focus, .form-textarea:focus, .filter-select:focus {
+        background-color: #0d0000 !important;
+        border-color: #D9A441 !important;
+        color: #F5E6C8 !important;
+        box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.18), 0 0 18px rgba(255, 59, 59, 0.25) !important;
+      }
+      .form-select option {
+        background-color: #181818 !important;
+        color: #F5E6C8 !important;
+      }
+      .toast {
+        background-color: #111111 !important;
+        color: #00e676 !important;
+        border: 1px solid #00e676 !important;
+        box-shadow: 0 0 20px rgba(0, 230, 118, 0.25) !important;
+        font-family: 'Share Tech Mono', monospace !important;
+        font-size: 11px !important;
+        letter-spacing: 1px !important;
+        opacity: 0;
+        transition: all 0.35s;
+      }
+      .toast.show {
+        opacity: 1 !important;
+      }
+
       body {
         background: #0A0A0A !important;
         background-color: #0A0A0A !important;
@@ -899,11 +953,11 @@
       }
       /* FIX CURSOR FOR DESKTOP AND MOBILE */
       @media (pointer: fine) {
-        body { cursor: auto !important; }
+        body, * { cursor: auto !important; }
       }
       @media (hover: none) and (pointer: coarse) {
         #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
-        body { cursor: auto !important; }
+        body, * { cursor: auto !important; }
       }
     </style>
 
@@ -929,10 +983,7 @@
         opacity: 0 !important;
         pointer-events: none !important;
       }
-      * { cursor: default !important; }
-      a, button, [onclick], select, label, input[type="submit"], .topbar-icon-btn, .btn-panel, .btn-outline, .manage-list li, .pwd-toggle-btn {
-        cursor: pointer !important;
-      }
+      body, * { cursor: auto !important; }
       /* ── SMOOTH SCROLL + TRANSITIONS ── */
       html { scroll-behavior: smooth; }
       body { transition: none !important; }
@@ -960,19 +1011,30 @@
         <div class="logo-hex">⚑</div>
         <a href="{{ url_for('admin.admin_dashboard') }}" class="topbar-brand">DosaCTF</a>
         <div class="topbar-divider"></div>
-        <span class="topbar-page">Admin Settings</span>
+        <span class="topbar-page"><a href="/admin-dashboard" style="color: var(--muted); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Admin</a> <span style="color: var(--muted); margin: 0 4px;">›</span> <span style="color: var(--primary);">Admin Settings</span></span>
       </div>
-            <div class="topbar-right">
-        <div class="topbar-icon-btn" title="Notifications">
-          🔔
-          <div class="notif-badge">3</div>
-        </div>
-        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-icon-btn" title="Settings">⚙</a>
-        <a href="/logout" class="btn btn-outline-danger btn-sm d-flex align-items-center" title="Logout" style="text-decoration: none; padding: 4px 10px; font-family: 'Share Tech Mono', monospace; font-weight: bold; border-color: rgba(255, 59, 59, 0.4);">⏻ LOGOUT</a>
-        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-profile" style="text-decoration: none;">
-          <div class="profile-avatar">AD</div>
-          <span class="profile-name">Admin</span>
-          <span class="profile-arrow">▾</span>
+      <div class="topbar-right">
+        <!-- Notifications -->
+        <a href="/notifications?from=admin" class="topbar-action" title="Notifications">
+          <span class="action-icon">🔔</span>
+          <span>NOTIFICATIONS</span>
+          <div class="notif-badge" id="topbar-notif-badge" style="display: none;">0</div>
+        </a>
+        <!-- Settings -->
+        <a href="{{ url_for('admin.admin_settings') }}" class="topbar-action" title="Settings">
+          <span class="action-icon">⚙</span>
+          <span>SETTINGS</span>
+        </a>
+        <!-- Logout -->
+        <a href="/logout" class="topbar-action logout-btn" title="Logout">
+          <span class="action-icon">⏻</span>
+          <span>LOGOUT</span>
+        </a>
+        <!-- Admin Profile -->
+        <a href="{{ url_for('admin.admin_profile') }}" class="topbar-action profile-btn" title="Admin Profile">
+          <div class="profile-avatar">{{ session.get('avatar', 'AD') }}</div>
+          <span>{{ session.get('username', 'Admin') }}</span>
+          <span style="font-size:10px; opacity:0.7;">▾</span>
         </a>
       </div>
     </nav>
@@ -1101,134 +1163,122 @@
             </div>
           </div>
           <div class="panel-body">
+            <!-- Form 1: Password Change -->
             <form method="POST" action="{{ url_for('admin.admin_settings') }}">
               <input type="hidden" name="form_type" value="password" />
               <div class="form-section">
                 <div class="form-section-title">Change Password</div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Current Password</label>
-                  <div style="position: relative; width: 100%;">
-                    <input
-                    class="form-input" style="padding-right: 40px;"
-                    type="password"
-                    name="current_password"
-                    placeholder="••••••••••••"
-                  />
-                    <span class="pwd-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none;">[ SHOW ]</span>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">New Password</label>
-                  <div style="position: relative; width: 100%;">
-                    <input
-                    class="form-input" style="padding-right: 40px;"
-                    type="password"
-                    name="new_password"
-                    placeholder="New strong password"
-                  />
-                    <span class="pwd-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none;">[ SHOW ]</span>
-                  </div>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Confirm New Password</label>
-                  <div style="position: relative; width: 100%;">
-                    <input
-                    class="form-input" style="padding-right: 40px;"
-                    type="password"
-                    name="confirm_password"
-                    placeholder="Repeat new password"
-                  />
-                    <span class="pwd-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none;">[ SHOW ]</span>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Password Strength</label>
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 6px;
-                      height: 42px;
-                    "
-                  >
-                    <div
-                      style="
-                        flex: 1;
-                        height: 4px;
-                        background: var(--bg3);
-                        border-radius: 2px;
-                      "
-                    >
-                      <div
-                        style="
-                          width: 80%;
-                          height: 100%;
-                          background: var(--green);
-                          box-shadow: 0 0 6px var(--green);
-                        "
-                      ></div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <div style="position: relative; width: 100%;">
+                      <input
+                        class="form-input" style="padding-right: 40px;"
+                        type="password"
+                        name="current_password"
+                        placeholder="••••••••••••"
+                        required
+                      />
+                      <span class="pwd-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none;">[ SHOW ]</span>
                     </div>
-                    <span
-                      style="
-                        font-family: &quot;Share Tech Mono&quot;, monospace;
-                        font-size: 10px;
-                        color: var(--green);
-                      "
-                      >STRONG</span
-                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <div style="position: relative; width: 100%;">
+                      <input
+                        class="form-input" style="padding-right: 40px;"
+                        type="password"
+                        name="new_password"
+                        placeholder="New strong password"
+                        required
+                      />
+                      <span class="pwd-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none;">[ SHOW ]</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <div style="position: relative; width: 100%;">
+                      <input
+                        class="form-input" style="padding-right: 40px;"
+                        type="password"
+                        name="confirm_password"
+                        placeholder="Repeat new password"
+                        required
+                      />
+                      <span class="pwd-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; user-select: none;">[ SHOW ]</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password Strength</label>
+                    <div style="display: flex; align-items: center; gap: 6px; height: 42px;">
+                      <div style="flex: 1; height: 4px; background: var(--bg3); border-radius: 2px;">
+                        <div style="width: 80%; height: 100%; background: var(--green); box-shadow: 0 0 6px var(--green);"></div>
+                      </div>
+                      <span style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--green);">STRONG</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="form-section">
-              <div class="form-section-title">Two-Factor Authentication</div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Enable 2FA (TOTP)</div>
-                  <div class="toggle-desc">
-                    Require authenticator code on login
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" checked /><span
-                    class="toggle-slider"
-                  ></span
-                ></label>
+              <div class="btn-row" style="margin-bottom: 24px;">
+                <button type="submit" class="btn-panel">
+                  Update Password
+                </button>
               </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Login IP Whitelist</div>
-                  <div class="toggle-desc">
-                    Restrict admin login to known IPs
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" /><span class="toggle-slider"></span
-                ></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Session Timeout</div>
-                  <div class="toggle-desc">
-                    Auto-logout after 2 hours of inactivity
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" checked /><span
-                    class="toggle-slider"
-                  ></span
-                ></label>
-              </div>
-            </div>
-            <div class="btn-row">
-              <button type="submit" class="btn-panel">
-                Update Security
-              </button>
             </form>
-            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border2); margin: 24px 0;" />
+
+            <!-- Form 2: Security Configurations -->
+            <form method="POST" action="{{ url_for('admin.admin_settings') }}">
+              <input type="hidden" name="form_type" value="security_settings" />
+              <div class="form-section">
+                <div class="form-section-title">Two-Factor Authentication</div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Enable 2FA (TOTP)</div>
+                    <div class="toggle-desc">
+                      Require authenticator code on login
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="enable_2fa" {% if settings.enable_2fa or settings.enable_2fa is none %}checked{% endif %} /><span
+                      class="toggle-slider"
+                    ></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Login IP Whitelist</div>
+                    <div class="toggle-desc">
+                      Restrict admin login to known IPs
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="ip_whitelist" {% if settings.ip_whitelist %}checked{% endif %} /><span class="toggle-slider"></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Session Timeout</div>
+                    <div class="toggle-desc">
+                      Auto-logout after 2 hours of inactivity
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="session_timeout" {% if settings.session_timeout or settings.session_timeout is none %}checked{% endif %} /><span
+                      class="toggle-slider"
+                    ></span
+                  ></label>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn-panel">
+                  Update Security Settings
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -1358,83 +1408,90 @@
             </div>
           </div>
           <div class="panel-body">
-            <div class="form-section">
-              <div class="form-section-title">Admin Alerts</div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Suspicious Activity Alerts</div>
-                  <div class="toggle-desc">
-                    Get notified of anomalous flag submissions
+            <form method="POST" action="{{ url_for('admin.admin_settings') }}">
+              <input type="hidden" name="form_type" value="notifications" />
+              <div class="form-section">
+                <div class="form-section-title">Admin Alerts</div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Suspicious Activity Alerts</div>
+                    <div class="toggle-desc">
+                      Get notified of anomalous flag submissions
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="alert_suspicious" {% if settings.alert_suspicious %}checked{% endif %} /><span
+                      class="toggle-slider"
+                    ></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">New User Registration</div>
+                    <div class="toggle-desc">Alert on each new participant</div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="alert_registration" {% if settings.alert_registration %}checked{% endif %} /><span class="toggle-slider"></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Challenge Solve Milestones</div>
+                    <div class="toggle-desc">
+                      Notify when a challenge is first solved
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="alert_milestones" {% if settings.alert_milestones %}checked{% endif %} /><span
+                      class="toggle-slider"
+                    ></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Server Error Alerts</div>
+                    <div class="toggle-desc">
+                      Immediate notification on infra issues
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="alert_errors" {% if settings.alert_errors %}checked{% endif %} /><span
+                      class="toggle-slider"
+                    ></span
+                  ></label>
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="form-section-title">Notification Channel</div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Alert Email</label>
+                    <input
+                      class="form-input"
+                      type="email"
+                      name="alert_email"
+                      value="{{ settings.alert_email or '' }}"
+                      placeholder="alerts@dosactf.io"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Webhook URL (optional)</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      name="webhook_url"
+                      value="{{ settings.webhook_url or '' }}"
+                      placeholder="https://hooks.slack.com/..."
+                    />
                   </div>
                 </div>
-                <label class="toggle"
-                  ><input type="checkbox" checked /><span
-                    class="toggle-slider"
-                  ></span
-                ></label>
               </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">New User Registration</div>
-                  <div class="toggle-desc">Alert on each new participant</div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" /><span class="toggle-slider"></span
-                ></label>
+              <div class="btn-row">
+                <button class="btn-panel" type="submit">
+                  Save Notifications
+                </button>
               </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Challenge Solve Milestones</div>
-                  <div class="toggle-desc">
-                    Notify when a challenge is first solved
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" checked /><span
-                    class="toggle-slider"
-                  ></span
-                ></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Server Error Alerts</div>
-                  <div class="toggle-desc">
-                    Immediate notification on infra issues
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" checked /><span
-                    class="toggle-slider"
-                  ></span
-                ></label>
-              </div>
-            </div>
-            <div class="form-section">
-              <div class="form-section-title">Notification Channel</div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Alert Email</label>
-                  <input
-                    class="form-input"
-                    type="email"
-                    value="alerts@dosactf.io"
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Webhook URL (optional)</label>
-                  <input
-                    class="form-input"
-                    type="text"
-                    placeholder="https://hooks.slack.com/..."
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="btn-row">
-              <button class="btn-panel" onclick="showToast()">
-                Save Notifications
-              </button>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -1448,70 +1505,73 @@
             </div>
           </div>
           <div class="panel-body">
-            <div class="form-section">
-              <div class="form-section-title">Platform</div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Maintenance Mode</div>
-                  <div class="toggle-desc">
-                    Lock platform for all non-admins
+            <form method="POST" action="{{ url_for('admin.admin_settings') }}">
+              <input type="hidden" name="form_type" value="system" />
+              <div class="form-section">
+                <div class="form-section-title">Platform</div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Maintenance Mode</div>
+                    <div class="toggle-desc">
+                      Lock platform for all non-admins
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="maintenance_mode" {% if settings.maintenance_mode %}checked{% endif %} /><span class="toggle-slider"></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Debug Logging</div>
+                    <div class="toggle-desc">
+                      Verbose server-side logging to file
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="debug_logging" {% if settings.debug_logging %}checked{% endif %} /><span class="toggle-slider"></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Rate Limiting</div>
+                    <div class="toggle-desc">
+                      Protect endpoints from brute-force
+                    </div>
+                  </div>
+                  <label class="toggle"
+                    ><input type="checkbox" name="rate_limiting" {% if settings.rate_limiting %}checked{% endif %} /><span
+                      class="toggle-slider"
+                    ></span
+                  ></label>
+                </div>
+              </div>
+              <div class="form-section">
+                <div class="form-section-title">Database</div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Auto-Backup Interval</label>
+                    <select class="form-select" name="auto_backup">
+                      <option {% if settings.auto_backup == 'Every 1 hour' %}selected{% endif %}>Every 1 hour</option>
+                      <option {% if settings.auto_backup == 'Every 6 hours' %}selected{% endif %}>Every 6 hours</option>
+                      <option {% if settings.auto_backup == 'Daily' or not settings.auto_backup %}selected{% endif %}>Daily</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Retention Period</label>
+                    <select class="form-select" name="retention">
+                      <option {% if settings.retention == '7 days' %}selected{% endif %}>7 days</option>
+                      <option {% if settings.retention == '30 days' or settings.retention == '30 Days' or not settings.retention %}selected{% endif %}>30 days</option>
+                      <option {% if settings.retention == '90 days' %}selected{% endif %}>90 days</option>
+                    </select>
                   </div>
                 </div>
-                <label class="toggle"
-                  ><input type="checkbox" /><span class="toggle-slider"></span
-                ></label>
               </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Debug Logging</div>
-                  <div class="toggle-desc">
-                    Verbose server-side logging to file
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" /><span class="toggle-slider"></span
-                ></label>
+              <div class="btn-row">
+                <button class="btn-panel" type="submit">
+                  Apply System Settings
+                </button>
               </div>
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-name">Rate Limiting</div>
-                  <div class="toggle-desc">
-                    Protect endpoints from brute-force
-                  </div>
-                </div>
-                <label class="toggle"
-                  ><input type="checkbox" checked /><span
-                    class="toggle-slider"
-                  ></span
-                ></label>
-              </div>
-            </div>
-            <div class="form-section">
-              <div class="form-section-title">Database</div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Auto-Backup Interval</label>
-                  <select class="form-select">
-                    <option>Every 1 hour</option>
-                    <option selected>Every 6 hours</option>
-                    <option>Daily</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Retention Period</label>
-                  <select class="form-select">
-                    <option>7 days</option>
-                    <option selected>30 days</option>
-                    <option>90 days</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="btn-row">
-              <button class="btn-panel" onclick="showToast()">
-                Apply System Settings
-              </button>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -1539,7 +1599,7 @@
                 <div class="danger-title">Reset Leaderboard</div>
                 <div class="danger-desc">Clear all scores — irreversible</div>
               </div>
-              <button class="btn-danger">Reset</button>
+              <button class="btn-danger" onclick="openDangerModal('reset-leaderboard')">Reset</button>
             </div>
             <div class="danger-item">
               <div class="danger-info">
@@ -1548,14 +1608,14 @@
                   Delete every flag submission record
                 </div>
               </div>
-              <button class="btn-danger">Purge</button>
+              <button class="btn-danger" onclick="openDangerModal('purge-submissions')">Purge</button>
             </div>
             <div class="danger-item">
               <div class="danger-info">
                 <div class="danger-title">Force-Logout All Users</div>
                 <div class="danger-desc">Invalidate every active session</div>
               </div>
-              <button class="btn-danger">Logout All</button>
+              <button class="btn-danger" onclick="openDangerModal('force-logout')">Logout All</button>
             </div>
             <div class="danger-item">
               <div class="danger-info">
@@ -1564,12 +1624,190 @@
                   Remove all challenges, users, scores
                 </div>
               </div>
-              <button class="btn-danger">Wipe</button>
+              <button class="btn-danger" onclick="openDangerModal('wipe-event')">Wipe</button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ══ DANGER CONFIRMATION MODAL ══ -->
+    <div id="danger-modal-overlay" style="
+      display:none; position:fixed; inset:0; z-index:99999;
+      background:rgba(0,0,0,0.82); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center;">
+      <div id="danger-modal-box" style="
+        background:#111; border:1px solid var(--primary);
+        box-shadow:0 0 40px rgba(255,59,59,0.35); padding:32px 28px;
+        max-width:420px; width:90%; position:relative;
+        font-family:'Rajdhani',sans-serif; animation:fadeUp 0.2s ease;">
+        <div style="position:absolute;top:0;right:0;width:16px;height:16px;
+          border-top:2px solid var(--primary);border-right:2px solid var(--primary);"></div>
+        <div style="position:absolute;bottom:0;left:0;width:16px;height:16px;
+          border-bottom:2px solid var(--primary);border-left:2px solid var(--primary);"></div>
+        <div style="font-family:'Orbitron',monospace;font-size:11px;color:var(--primary);
+          letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">⚠ Confirm Action</div>
+        <div id="modal-title" style="font-size:18px;font-weight:700;color:#F5E6C8;margin-bottom:6px;"></div>
+        <div id="modal-desc" style="font-family:'Share Tech Mono',monospace;font-size:11px;
+          color:rgba(245,230,200,0.5);margin-bottom:20px;line-height:1.6;"></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(245,230,200,0.45);
+          margin-bottom:8px;">Type <span id="modal-confirm-word" style="color:var(--primary);font-weight:700;"></span> to confirm:</div>
+        <input id="modal-input" type="text" autocomplete="off" style="
+          background:#0a0a0a; border:1px solid rgba(255,59,59,0.35);
+          color:#F5E6C8; padding:10px 14px; font-family:'Share Tech Mono',monospace;
+          font-size:13px; width:100%; outline:none; margin-bottom:20px;
+          transition:border-color 0.2s;" placeholder=""
+          oninput="checkModalInput()" onkeydown="if(event.key==='Enter')execDangerAction()">
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button onclick="closeDangerModal()" style="
+            background:transparent;border:1px solid rgba(245,230,200,0.18);
+            color:rgba(245,230,200,0.5);padding:8px 20px;font-family:'Orbitron',monospace;
+            font-size:9px;letter-spacing:1px;cursor:pointer;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='rgba(245,230,200,0.5)';this.style.color='#F5E6C8'"
+            onmouseout="this.style.borderColor='rgba(245,230,200,0.18)';this.style.color='rgba(245,230,200,0.5)'">CANCEL</button>
+          <button id="modal-exec-btn" onclick="execDangerAction()" disabled style="
+            background:rgba(255,59,59,0.08);border:1px solid rgba(255,59,59,0.3);
+            color:rgba(255,59,59,0.4);padding:8px 20px;font-family:'Orbitron',monospace;
+            font-size:9px;letter-spacing:1px;cursor:not-allowed;transition:all 0.2s;" id="modal-exec-btn">CONFIRM</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DANGER TOAST ══ -->
+    <div id="danger-toast" style="
+      display:none;position:fixed;bottom:32px;right:32px;z-index:99999;
+      background:#111;border:1px solid var(--green);padding:14px 22px;
+      font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);
+      letter-spacing:1px;box-shadow:0 0 20px rgba(0,230,118,0.25);"></div>
+
+    <script>
+      const DANGER_CONFIGS = {
+        'reset-leaderboard': {
+          title: 'Reset Leaderboard',
+          desc: 'This will set ALL user scores to 0 and wipe the entire leaderboard. This action cannot be undone.',
+          word: 'RESET',
+          endpoint: '/api/admin/danger/reset-leaderboard',
+          toast: '✓ Leaderboard reset. All scores cleared.'
+        },
+        'purge-submissions': {
+          title: 'Purge All Submissions',
+          desc: 'This will permanently delete every flag solve record from the database. Users keep their accounts but lose all solve history.',
+          word: 'PURGE',
+          endpoint: '/api/admin/danger/purge-submissions',
+          toast: '✓ All submission records purged.'
+        },
+        'force-logout': {
+          title: 'Force-Logout All Users',
+          desc: 'This will mark every user as offline and invalidate all active sessions. Users will need to log in again.',
+          word: 'LOGOUT',
+          endpoint: '/api/admin/danger/force-logout',
+          toast: '✓ All active user sessions terminated.'
+        },
+        'wipe-event': {
+          title: 'Wipe Event Data',
+          desc: 'This will DELETE all challenges, all solve records, and reset all user scores. Non-admin user accounts remain but event data is gone.',
+          word: 'WIPE',
+          endpoint: '/api/admin/danger/wipe-event',
+          toast: '✓ Event data wiped. Challenges and scores removed.'
+        }
+      };
+
+      let currentAction = null;
+
+      function openDangerModal(action) {
+        const cfg = DANGER_CONFIGS[action];
+        if (!cfg) return;
+        currentAction = action;
+        document.getElementById('modal-title').textContent = cfg.title;
+        document.getElementById('modal-desc').textContent = cfg.desc;
+        document.getElementById('modal-confirm-word').textContent = cfg.word;
+        document.getElementById('modal-input').value = '';
+        document.getElementById('modal-input').placeholder = cfg.word;
+        const btn = document.getElementById('modal-exec-btn');
+        btn.disabled = true;
+        btn.style.color = 'rgba(255,59,59,0.4)';
+        btn.style.borderColor = 'rgba(255,59,59,0.3)';
+        btn.style.cursor = 'not-allowed';
+        const overlay = document.getElementById('danger-modal-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => document.getElementById('modal-input').focus(), 50);
+      }
+
+      function closeDangerModal() {
+        document.getElementById('danger-modal-overlay').style.display = 'none';
+        currentAction = null;
+      }
+
+      function checkModalInput() {
+        if (!currentAction) return;
+        const word = DANGER_CONFIGS[currentAction].word;
+        const val = document.getElementById('modal-input').value.toUpperCase().trim();
+        const btn = document.getElementById('modal-exec-btn');
+        if (val === word) {
+          btn.disabled = false;
+          btn.style.color = 'var(--primary)';
+          btn.style.borderColor = 'var(--primary)';
+          btn.style.cursor = 'pointer';
+        } else {
+          btn.disabled = true;
+          btn.style.color = 'rgba(255,59,59,0.4)';
+          btn.style.borderColor = 'rgba(255,59,59,0.3)';
+          btn.style.cursor = 'not-allowed';
+        }
+      }
+
+      function showDangerToast(msg, isError) {
+        const t = document.getElementById('danger-toast');
+        t.textContent = msg;
+        t.style.borderColor = isError ? 'var(--primary)' : 'var(--green)';
+        t.style.color = isError ? 'var(--primary)' : 'var(--green)';
+        t.style.boxShadow = isError
+          ? '0 0 20px rgba(255,59,59,0.25)'
+          : '0 0 20px rgba(0,230,118,0.25)';
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 4000);
+      }
+
+      function execDangerAction() {
+        if (!currentAction) return;
+        const cfg = DANGER_CONFIGS[currentAction];
+        const btn = document.getElementById('modal-exec-btn');
+        btn.textContent = 'EXECUTING...';
+        btn.disabled = true;
+
+        fetch(cfg.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(data => {
+          closeDangerModal();
+          if (data.success) {
+            showDangerToast(cfg.toast, false);
+          } else {
+            showDangerToast('✗ Error: ' + (data.error || 'Unknown error'), true);
+          }
+        })
+        .catch(err => {
+          closeDangerModal();
+          showDangerToast('✗ Network error. Try again.', true);
+        })
+        .finally(() => {
+          btn.textContent = 'CONFIRM';
+        });
+      }
+
+      // Close modal on overlay click
+      document.getElementById('danger-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeDangerModal();
+      });
+      // Close on Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDangerModal();
+      });
+    </script>
+
 
     <script>
       /* PARTICLES */

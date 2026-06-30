@@ -11212,11 +11212,11 @@ footer {
 #cursor-sword { display: none !important; }
 
 /* ============================================================
-   MOBILE-ONLY STYLES  (max-width: 767px)
+   MOBILE-ONLY STYLES  (max-width: 900px)
    All rules below are scoped to mobile screens only.
    Desktop/laptop view is completely unaffected.
    ============================================================ */
-@media (max-width: 767px) {
+@media (max-width: 900px) {
 
   /* 1. Hide the custom cursor on mobile — use default touch */
   #cursor-outer,
@@ -11236,6 +11236,24 @@ footer {
   nav .nav-links,
   nav .nav-actions {
     display: none !important;
+  }
+
+  nav {
+    flex-wrap: nowrap !important;
+  }
+
+  nav > div:first-child {
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .topbar-page {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
   /* 3. Show the 3-dot menu button only on mobile */
@@ -11351,7 +11369,7 @@ footer {
 }
 
 /* On desktop, always hide the mobile-only elements */
-@media (min-width: 768px) {
+@media (min-width: 901px) {
   .mobile-menu-btn,
   .mobile-dropdown,
   .mobile-menu-overlay {
@@ -11366,9 +11384,358 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 /* Perfect Mobile Interface Overrides */
 @media (max-width: 768px) {
-  .stats-row, .mid-row, .bot-row { grid-template-columns: 1fr !important; }
+  .stats-row, .mid-row, .bot-row, .stats-panel { grid-template-columns: 1fr !important; }
   .topbar { flex-direction: column; height: auto; padding: 15px; gap: 15px; }
   .topbar-right { width: 100%; justify-content: space-between; }
   .main-content { padding: 15px; }
   .stat-card { padding: 15px; }
 }
+
+/* Disable sticky behavior on filter bar and filter section to prevent overlapping issues on scroll */
+.filter-bar, .filter-section {
+  position: relative !important;
+  top: auto !important;
+}
+
+/* ============================================================
+   DOSA CTF — GLOBAL MOBILE-RESPONSIVE SYSTEM
+   Covers all 28 templates via shared main.css
+   ============================================================ */
+
+/* ── HAMBURGER MENU BUTTON (visible on mobile only) ── */
+.mob-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border2);
+  background: var(--bg2);
+  padding: 6px;
+  cursor: pointer;
+  z-index: 1100;
+  flex-shrink: 0;
+}
+.mob-menu-btn span {
+  display: block;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1px;
+  transition: all 0.25s;
+}
+
+/* ── MOBILE NAV DRAWER ── */
+.mob-nav-drawer {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1090;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
+}
+.mob-nav-drawer.open { display: block; }
+
+.mob-nav-panel {
+  position: absolute;
+  top: 0; right: 0;
+  width: min(300px, 88vw);
+  height: 100%;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+}
+.mob-nav-close {
+  align-self: flex-end;
+  margin: 0 18px 12px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+.mob-nav-panel a,
+.mob-nav-panel .mob-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  color: var(--text);
+  text-decoration: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(217,164,65,0.06);
+  transition: background 0.2s, color 0.2s;
+}
+.mob-nav-panel a:hover,
+.mob-nav-panel .mob-nav-link:hover {
+  background: rgba(217,164,65,0.07);
+  color: var(--primary);
+}
+.mob-nav-panel a.active { color: var(--primary); }
+
+/* ── ADMIN TOPBAR ACTION BUTTONS on mobile ── */
+.topbar-action {
+  height: 38px;
+  padding: 0 14px;
+  font-size: 11px;
+}
+
+/* ============================================================
+   BREAKPOINT: ≤900px  (Tablet / large mobile)
+   ============================================================ */
+@media (max-width: 900px) {
+  /* ── SHARED NAV ── */
+  nav, .topbar {
+    padding: 0 18px;
+    height: 56px;
+  }
+  .nav-links { display: none !important; }
+  .mob-menu-btn { display: flex; }
+
+  /* ── PAGE WRAPPER ── */
+  .page-wrapper { padding-top: 56px; }
+  .page-header, .ops-header {
+    padding: 36px 20px 28px;
+  }
+  .page-header-watermark, .header-wm { display: none; }
+  .page-title { font-size: clamp(22px, 5vw, 34px); }
+
+  /* ── FILTER / SEARCH ── */
+  .filter-section, .filter-bar { padding: 14px 18px; }
+  .filter-inner { flex-wrap: wrap; gap: 10px; }
+  .filter-count, .filter-divider { display: none; }
+
+  /* ── CONTENT GRIDS ── */
+  .content-grid, .mid-row, .bot-row, .form-row, .stats-row {
+    grid-template-columns: 1fr !important;
+  }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .challenges-grid { grid-template-columns: 1fr !important; }
+  .features-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* ── DASHBOARD CARDS ── */
+  .stat-card { padding: 16px 18px; }
+  .card      { padding: 22px 18px; }
+
+  /* ── ADMIN TOPBAR ── */
+  .topbar-action span:not(.action-icon) { display: none; } /* hide text labels, keep icons */
+  .topbar-action { padding: 0 10px; min-width: 38px; }
+  .topbar-action .action-icon { font-size: 17px; }
+
+  /* ── ADMIN SIDEBAR ── */
+  .settings-sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 0 !important;
+  }
+  .sidebar-item {
+    white-space: nowrap;
+    border-bottom: none !important;
+    padding: 12px 18px !important;
+  }
+  .main-content {
+    flex-direction: column !important;
+    padding: 16px !important;
+  }
+
+  /* ── LEADERBOARD TABLE ── */
+  .lb-col-head, .lb-row {
+    grid-template-columns: 50px 1fr 80px !important;
+  }
+  .lb-col-head > *:nth-child(n+4),
+  .lb-row > *:nth-child(n+4) { display: none !important; }
+
+  /* ── PODIUM ── */
+  .podium { grid-template-columns: 1fr !important; gap: 10px !important; }
+}
+
+/* ============================================================
+   BREAKPOINT: ≤768px  (Mobile)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* ── SHARED NAV ── */
+  nav, .topbar { height: auto; min-height: 54px; padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
+  .topbar-left  { flex: 1; min-width: 0; }
+  .topbar-right { gap: 6px; }
+  .topbar-brand { font-size: 14px; }
+  .topbar-page  { font-size: 12px; }
+  .topbar-divider { display: none; }
+
+  /* ── ADMIN TOPBAR ── */
+  .topbar-action { height: 34px; padding: 0 8px; }
+  .notif-badge   { top: 2px; right: 4px; width: 12px; height: 12px; font-size: 7px; }
+
+  /* ── PAGE WRAPPER ── */
+  .page-wrapper { padding-top: 54px; }
+  .page-header, .ops-header { padding: 28px 16px 22px; }
+  .page-title    { font-size: clamp(18px, 5vw, 28px); }
+  .page-subtitle { font-size: 13px; }
+  .page-stats, .header-stats { gap: 14px; flex-wrap: wrap; margin-top: 14px; }
+  .page-stat-divider, .hstat-div { display: none; }
+
+  /* ── FILTER / SEARCH ── */
+  .filter-section, .filter-bar { padding: 12px 16px; }
+  .filter-select { min-width: 0; flex: 1; }
+  .filter-input  { min-width: 0; flex: 1; }
+  .filter-inner  { display: flex; flex-wrap: wrap; gap: 8px; }
+  .view-toggle, .tab-group { display: none !important; }
+
+  /* ── CONTENT / GRIDS ── */
+  .stats-grid    { grid-template-columns: repeat(2, 1fr) !important; }
+  .features-grid { grid-template-columns: 1fr !important; }
+
+  /* ── CARDS ── */
+  .stat-card { padding: 14px 14px; }
+  .card      { padding: 18px 14px; }
+  .data-card, .user-card, .challenge-card { width: 100% !important; }
+
+  /* ── TABLES (admin user/challenge management) ── */
+  .data-table  { font-size: 12px; }
+  .data-table th,
+  .data-table td { padding: 8px 10px; }
+  .table-actions { gap: 6px; }
+  .table-actions .btn-sm { padding: 4px 8px; font-size: 10px; }
+
+  /* ── AUTH PAGES: login / register / forgot / reset / OTP ── */
+  .page          { grid-template-columns: 1fr !important; }
+  .left-panel    { display: none !important; }
+  .right-panel   { padding: 24px 18px 40px !important; justify-content: flex-start !important; }
+  .form-title    { font-size: 20px !important; }
+  .form-subtitle { font-size: 13px !important; }
+  .form-input    { font-size: 14px !important; padding: 13px 13px 13px 40px !important; }
+  .btn-submit    { padding: 15px 20px !important; font-size: 12px !important; }
+  .check-lbl     { font-size: 12px !important; }
+
+  /* ── USER / ADMIN PROFILE ── */
+  .profile-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+  .profile-tabs   { flex-wrap: wrap; gap: 6px; }
+  .profile-tab    { font-size: 12px; padding: 8px 14px; }
+  .profile-grid   { grid-template-columns: 1fr !important; }
+
+  /* ── NOTIFICATIONS ── */
+  .notif-list .notif-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+  /* ── MODAL ── */
+  .modal-box { width: 94vw !important; padding: 24px 18px !important; }
+
+  /* ── ADMIN PANEL GRID ── */
+  .panel-grid  { grid-template-columns: 1fr !important; }
+  .form-section { padding: 16px !important; }
+
+  /* ── ADMIN TOPBAR: show icons only, hide text ── */
+  .topbar-action span:not(.action-icon) { display: none !important; }
+  .topbar-action.profile-btn span:not(.action-icon):not(.profile-avatar) { display: none !important; }
+
+  /* ── DANGER ZONE CARDS ── */
+  .danger-card { padding: 16px !important; }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb-wrap { font-size: 12px; }
+}
+
+/* ============================================================
+   BREAKPOINT: ≤600px  (Small mobile)
+   ============================================================ */
+@media (max-width: 600px) {
+  /* Nav */
+  nav, .topbar { padding: 8px 12px; }
+
+  /* Page header */
+  .page-header, .ops-header { padding: 22px 14px 18px; }
+  .page-title { font-size: clamp(16px, 5.5vw, 24px); }
+
+  /* Stats grid single column */
+  .stats-grid { grid-template-columns: 1fr !important; }
+  .stat-card  { padding: 12px 14px; }
+
+  /* Auth right panel */
+  .right-panel { padding: 18px 14px 32px !important; }
+  .form-title  { font-size: 18px !important; }
+  .form-input  { padding: 12px 12px 12px 38px !important; }
+
+  /* Leaderboard */
+  .lb-col-head, .lb-row { grid-template-columns: 44px 1fr 72px !important; }
+  .lb-col-head > *:nth-child(n+3),
+  .lb-row > *:nth-child(n+3) { display: none !important; }
+
+  /* Admin topbar: collapse to icon-only row that wraps */
+  .topbar-right { flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .topbar-action { height: 32px; padding: 0 8px; border-radius: 2px; }
+
+  /* Tables */
+  .data-table th:nth-child(n+4),
+  .data-table td:nth-child(n+4) { display: none !important; }
+
+  /* Cards */
+  .card { padding: 14px 12px; }
+
+  /* Modal */
+  .modal-box { width: 98vw !important; padding: 18px 14px !important; }
+}
+
+/* ============================================================
+   BREAKPOINT: ≤420px  (Very small phones)
+   ============================================================ */
+@media (max-width: 420px) {
+  nav, .topbar { padding: 8px 10px; }
+  .topbar-brand { font-size: 13px; }
+
+  .page-title   { font-size: 16px !important; }
+  .right-panel  { padding: 14px 12px 28px !important; }
+  .form-title   { font-size: 16px !important; }
+
+  .stat-card    { padding: 10px 12px; }
+  .page-header, .ops-header { padding: 18px 12px 14px; }
+
+  .btn-submit   { font-size: 11px !important; padding: 13px 16px !important; }
+
+  /* Admin topbar: single icon row, minimum 30px */
+  .topbar-action { height: 30px; padding: 0 6px; font-size: 10px; }
+  .topbar-action .action-icon { font-size: 14px; }
+}
+
+/* Optimize pro stats cards and rank badges on mobile devices */
+@media (max-width: 768px) {
+  .rank-badge {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    margin-bottom: 6px !important;
+    display: inline-block !important;
+    width: max-content !important;
+  }
+  .stat-card {
+    padding: 12px 14px !important;
+    gap: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  .stat-card-icon {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 20px !important;
+  }
+  .stat-card-num {
+    font-size: 22px !important;
+  }
+}
+
+/* ── TOUCH DEVICE: always show native cursor ── */
+@media (hover: none) and (pointer: coarse) {
+  *, *::before, *::after { cursor: auto !important; }
+  #cursor-outer, #cursor-inner, #cursor-sword,
+  .trail-particle, .click-spark, .floating-orb { display: none !important; }
+}
+

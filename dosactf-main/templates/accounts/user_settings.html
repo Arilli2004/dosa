@@ -625,6 +625,14 @@
         background-position: right 12px center;
         padding-right: 32px;
         /* cursor none removed */
+        color-scheme: dark;
+        background-color: #181818 !important;
+      }
+      .form-select option,
+      .form-select optgroup {
+        background-color: #181818 !important;
+        background: #181818 !important;
+        color: #F5E6C8 !important;
       }
       .form-input:focus,
       .form-select:focus,
@@ -835,6 +843,7 @@
         gap: 12px;
         margin-top: 18px;
         align-items: center;
+        justify-content: center;
       }
 
       /* TOAST */
@@ -903,7 +912,7 @@
         }
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 900px) {
         .topbar {
           padding: 0 12px !important;
         }
@@ -935,11 +944,47 @@
           display: none !important;
         }
       }
-    </style>
+    
+/* Theme Override for Option Dropdowns */
+select option, .form-select option, .filter-select option {
+    background: #181818 !important;
+    color: #F5E6C8 !important;
+}
+</style>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-      /* OVERRIDE BOOTSTRAP */
+            /* OVERRIDE BOOTSTRAP */
+      .form-select, .form-control, .form-input, .form-textarea, .filter-select {
+        background-color: #181818 !important;
+        color: #F5E6C8 !important;
+        border-color: rgba(245, 230, 200, 0.08) !important;
+      }
+      .form-select:focus, .form-control:focus, .form-input:focus, .form-textarea:focus, .filter-select:focus {
+        background-color: #0d0000 !important;
+        border-color: #D9A441 !important;
+        color: #F5E6C8 !important;
+        box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.18), 0 0 18px rgba(255, 59, 59, 0.25) !important;
+      }
+      .form-select option {
+        background-color: #181818 !important;
+        color: #F5E6C8 !important;
+      }
+      .toast {
+        background-color: #111111 !important;
+        color: #00e676 !important;
+        border: 1px solid #00e676 !important;
+        box-shadow: 0 0 20px rgba(0, 230, 118, 0.25) !important;
+        font-family: 'Share Tech Mono', monospace !important;
+        font-size: 11px !important;
+        letter-spacing: 1px !important;
+        opacity: 0;
+        transition: all 0.35s;
+      }
+      .toast.show {
+        opacity: 1 !important;
+      }
+
       body {
         background: #0A0A0A !important;
         background-color: #0A0A0A !important;
@@ -953,6 +998,125 @@
         #cursor-outer, #cursor-inner, #cursor-sword { display: none !important; }
         body { cursor: auto !important; }
       }
+      /* Desktop defaults: hide mobile-only elements */
+      .mobile-menu-btn,
+      .mobile-dropdown,
+      .mobile-menu-overlay {
+        display: none !important;
+      }
+
+      @media (max-width: 900px) {
+        .topbar-right {
+          display: none !important;
+        }
+
+        /* Show mobile menu button */
+        .mobile-menu-btn {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: 1.5px solid rgba(217,164,65,0.35);
+          border-radius: 8px;
+          padding: 6px 10px;
+          cursor: pointer;
+          color: var(--primary, #D9A441);
+          font-size: 22px;
+          line-height: 1;
+          letter-spacing: 2px;
+          margin-left: auto;
+          transition: background 0.2s, border-color 0.2s;
+          -webkit-tap-highlight-color: transparent;
+          cursor: pointer !important;
+        }
+
+        .mobile-menu-btn:active {
+          background: rgba(217,164,65,0.1);
+          border-color: var(--primary, #D9A441);
+        }
+
+        /* Mobile dropdown */
+        .mobile-dropdown {
+          display: none;
+          position: absolute;
+          top: 60px; /* Adjust based on navbar height */
+          right: 16px;
+          min-width: 200px;
+          background: rgba(12,12,18,0.97);
+          border: 1px solid rgba(217,164,65,0.25);
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(217,164,65,0.08);
+          overflow: hidden;
+          z-index: 99999;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          opacity: 0;
+          transform: translateY(-8px) scale(0.97);
+          transition: opacity 0.22s ease, transform 0.22s ease;
+          pointer-events: none;
+        }
+
+        .mobile-dropdown.open {
+          display: block !important;
+          opacity: 1 !important;
+          transform: translateY(0) scale(1) !important;
+          pointer-events: auto !important;
+          animation: mobile-dropdown-in-page 0.22s ease forwards;
+        }
+
+        .mobile-dropdown a {
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          padding: 14px 18px !important;
+          color: var(--text, #F5E6C8) !important;
+          text-decoration: none !important;
+          font-family: 'Rajdhani', sans-serif !important;
+          font-size: 15px !important;
+          font-weight: 500 !important;
+          letter-spacing: 0.5px !important;
+          border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+          transition: background 0.15s, color 0.15s !important;
+        }
+
+        .mobile-dropdown a:last-child {
+          border-bottom: none !important;
+        }
+
+        .mobile-dropdown a:hover,
+        .mobile-dropdown a:active {
+          background: rgba(217,164,65,0.1) !important;
+          color: var(--primary, #D9A441) !important;
+        }
+
+        .mobile-dropdown a.mob-logout {
+          color: #ff5c5c !important;
+        }
+
+        .mobile-dropdown a.mob-logout:hover,
+        .mobile-dropdown a.mob-logout:active {
+          background: rgba(255,92,92,0.1) !important;
+          color: #ff5c5c !important;
+        }
+
+        /* Overlay backdrop */
+        .mobile-menu-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 99990;
+          background: transparent;
+        }
+
+        .mobile-menu-overlay.open {
+          display: block !important;
+        }
+      }
+
+      @keyframes mobile-dropdown-in-page {
+        from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
     </style>
 </head>
   <body>
@@ -964,7 +1128,7 @@
 
     <nav class="topbar">
       <div class="topbar-left">
-        <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+        <a href="{% if session.get('username') %}/dashboard{% else %}/{% endif %}" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
           <img src="/static/Images/IMages_1.png" alt="Dosa CTF Logo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 6px;">
           <span class="topbar-brand">DosaCTF</span>
         </a>
@@ -973,21 +1137,42 @@
         <div class="topbar-item">Activity</div>
       </div>
       <div class="topbar-right">
+        {% if session.get('role') == 'admin' %}
+        <a href="/admin-dashboard" class="btn btn-outline-warning btn-sm d-flex align-items-center" style="font-family: 'Share Tech Mono', monospace; font-weight: bold; font-size: 11px; margin-right: 12px; border-color: rgba(217, 164, 65, 0.4); color: var(--primary); text-decoration: none;">ADMIN PORTAL</a>
+        {% endif %}
         <a href="/notifications" class="topbar-icon-btn" title="Notifications" style="text-decoration: none;">
-          🔔
-          <div class="notif-badge">0</div>
-        </a>
+      🔔
+      <div class="notif-badge" id="topbar-notif-badge" style="display: none;">0</div>
+    </a>
         <a href="/dashboard" class="topbar-icon-btn" title="Dashboard" style="text-decoration: none;">
           🖥️
         </a>
         <a href="/logout" class="topbar-icon-btn" title="Logout" style="text-decoration: none; color: #ff3b3b; border-color: #ff3b3b; background: rgba(255, 59, 59, 0.1);">
-          🚪
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff3b3b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
         </a>
         <div class="topbar-profile">
           <div class="profile-avatar" style="background: {{ session.get('avatar_style', 'linear-gradient(135deg, #1a0a3a, var(--blue))') }};">{{ session.get('avatar', 'ZC') }}</div>
           <span class="profile-name">{% if session.get('display_name') %}{{ session.get('display_name') }}{% elif session.get('username') %}{{ session.get('username') }}{% else %}Operative{% endif %}</span>
           <span class="profile-arrow">▾</span>
         </div>
+      </div>
+      <!-- MOBILE HAMBURGER (hidden on desktop via CSS) -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">&#8942;</button>
+      <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+      <div class="mobile-dropdown" id="mobileDropdown">
+        {% if session.get('role') == 'admin' %}
+        <a href="/admin-dashboard">&#9881; Admin Portal</a>
+        {% endif %}
+        <a href="/user-settings">&#128100; Profile</a>
+        <a href="/notifications">&#128276; Notifications</a>
+        <a href="/dashboard">&#128187; Dashboard</a>
+        <a href="/challenges">&#127987; Challenges</a>
+        <a href="/leaderboard">&#127942; Leaderboard</a>
+        <a href="/logout" class="mob-logout">&#128682; Logout</a>
       </div>
     </nav>
 
@@ -1075,7 +1260,7 @@
                     />
                   </div>
                 </div>
-                <div class="form-row">
+                <div class="form-row full">
                   <div class="form-group">
                     <label class="form-label">Email Address</label>
                     <input
@@ -1084,17 +1269,6 @@
                       name="email"
                       value="{{ user.email }}"
                     />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Country</label>
-                    <select class="form-select" name="country">
-                      <option>🇮🇳 India</option>
-                      <option>🇺🇸 United States</option>
-                      <option>🇬🇧 United Kingdom</option>
-                      <option>🇩🇪 Germany</option>
-                      <option>🇯🇵 Japan</option>
-                      <option>🌍 Other</option>
-                    </select>
                   </div>
                 </div>
                 <div class="form-row full">
@@ -1216,10 +1390,10 @@
                       class="form-input pwd-input"
                       type="password"
                       name="current_password"
-                    placeholder="••••••••••••"
+                      placeholder="Current Password"
                     />
                     
-                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 38px; cursor: pointer; opacity: 0.6;">👁️</span>
+                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 12px; top: 39px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: var(--primary); letter-spacing: 1px; user-select: none;">SHOW</span>
                   </div>
                   <div class="form-group" style="position: relative;">
                     <label class="form-label">New Password</label>
@@ -1230,7 +1404,7 @@
                     placeholder="New strong password"
                     />
                     
-                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 38px; cursor: pointer; opacity: 0.6;">👁️</span>
+                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 12px; top: 39px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: var(--primary); letter-spacing: 1px; user-select: none;">SHOW</span>
                   </div>
                 </div>
                 <div class="form-row">
@@ -1243,24 +1417,78 @@
                     placeholder="Repeat new password"
                     />
                     
-                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 38px; cursor: pointer; opacity: 0.6;">👁️</span>
+                    <span class="pwd-toggle" onclick="togglePwd(this)" style="position: absolute; right: 12px; top: 39px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: var(--primary); letter-spacing: 1px; user-select: none;">SHOW</span>
                   </div>
-                  <div class="form-group">
-                    <label class="form-label">Action</label>
-                    <button type="submit" class="btn-primary" style="width: 100%; height: 42px;">Update Password</button>
+                  <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-start;">
+                    <label class="form-label">Password Strength</label>
+                    <!-- Password Strength Meter -->
+                    <div class="pwd-strength-container" style="margin-top: 10px; font-family: 'Share Tech Mono', monospace; font-size: 11px; user-select: none;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Level:</span>
+                        <span id="strength-label" style="font-weight: bold; color: var(--muted); letter-spacing: 1px;">NONE</span>
+                      </div>
+                      <div class="progress-bar-bg" style="width: 100%; height: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(217, 164, 65, 0.1); border-radius: 2px;">
+                        <div id="strength-bar" style="width: 0%; height: 100%; background: transparent; transition: width 0.3s ease, background-color 0.3s ease;"></div>
+                      </div>
+                    </div>
                   </div>
+                </div>
+                <div class="btn-row" style="display: flex; justify-content: center; margin-top: 24px; margin-bottom: 12px;">
+                  <button type="submit" class="btn-panel" style="min-width: 220px;">Update Password</button>
                 </div>
                 <script>
                   function togglePwd(el) {
                     const input = el.previousElementSibling;
                     if (input.type === 'password') {
                       input.type = 'text';
-                      el.textContent = '🔒';
+                      el.textContent = 'HIDE';
                     } else {
                       input.type = 'password';
-                      el.textContent = '👁️';
+                      el.textContent = 'SHOW';
                     }
                   }
+                  
+                  // Password Strength Logic
+                  document.querySelector('input[name="new_password"]').addEventListener('input', function() {
+                    const val = this.value;
+                    let score = 0;
+                    if (val) {
+                      if (val.length >= 8) score++;
+                      if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+                      if (/[0-9]/.test(val)) score++;
+                      if (/[^A-Za-z0-9]/.test(val)) score++;
+                    }
+                    
+                    const bar = document.getElementById('strength-bar');
+                    const label = document.getElementById('strength-label');
+                    
+                    if (score === 0) {
+                      bar.style.width = '0%';
+                      bar.style.backgroundColor = 'transparent';
+                      label.textContent = 'NONE';
+                      label.style.color = 'var(--muted)';
+                    } else if (score === 1) {
+                      bar.style.width = '25%';
+                      bar.style.backgroundColor = '#ff3b3b'; // red
+                      label.textContent = 'WEAK';
+                      label.style.color = '#ff3b3b';
+                    } else if (score === 2) {
+                      bar.style.width = '50%';
+                      bar.style.backgroundColor = '#ffb300'; // amber
+                      label.textContent = 'MEDIUM';
+                      label.style.color = '#ffb300';
+                    } else if (score === 3) {
+                      bar.style.width = '75%';
+                      bar.style.backgroundColor = '#3b8bff'; // blue
+                      label.textContent = 'STRONG';
+                      label.style.color = '#3b8bff';
+                    } else if (score === 4) {
+                      bar.style.width = '100%';
+                      bar.style.backgroundColor = '#00e676'; // green
+                      label.textContent = 'VERY STRONG';
+                      label.style.color = '#00e676';
+                    }
+                  });
                 </script>
               </div>
             </form>
@@ -1411,19 +1639,7 @@
                 ></span
               ></label>
             </div>
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-name">Show Country Flag</div>
-                <div class="toggle-desc">
-                  Display country of origin on profile
-                </div>
-              </div>
-              <label class="toggle"
-                ><input type="checkbox" checked /><span
-                  class="toggle-slider"
-                ></span
-              ></label>
-            </div>
+
             <div class="btn-row">
               <button class="btn-panel" onclick="showToast()">
                 Save Privacy
@@ -1518,16 +1734,57 @@
                   <input
                     class="form-input"
                     type="email"
-                    value="zerocool@example.com"
+                    value="{{ user.email if user and user.email else '' }}"
+                    readonly
+                    style="opacity: 0.7;"
                   />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Frequency</label>
-                  <select class="form-select">
-                    <option>Instant</option>
-                    <option selected>Batched (every 2 hrs)</option>
-                    <option>Daily digest</option>
-                  </select>
+                  <div class="custom-freq-wrap" style="position: relative;">
+                    <div class="custom-freq-selected" id="freqSelected"
+                      style="background: #181818; border: 1px solid rgba(245,230,200,0.08); color: #F5E6C8; padding: 10px 36px 10px 14px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; position: relative; user-select: none;"
+                      onclick="toggleFreqDrop()">
+                      Batched (every 2 hrs)
+                      <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                        <svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path fill='#FF3B3B' d='M0 0l5 6 5-6z'/></svg>
+                      </span>
+                    </div>
+                    <div class="custom-freq-list" id="freqList"
+                      style="display: none; position: absolute; left: 0; right: 0; top: 100%; z-index: 999; background: #181818; border: 1px solid rgba(217,164,65,0.22); border-top: none;">
+                      <div class="freq-opt" onclick="selectFreq(this)" style="padding: 10px 14px; color: #F5E6C8; font-family: 'Rajdhani', sans-serif; font-size: 14px; cursor: pointer; transition: background 0.15s;"
+                        onmouseover="this.style.background='rgba(217,164,65,0.12)'" onmouseout="this.style.background='transparent'">Instant</div>
+                      <div class="freq-opt selected-opt" onclick="selectFreq(this)" style="padding: 10px 14px; color: #D9A441; font-family: 'Rajdhani', sans-serif; font-size: 14px; cursor: pointer; background: rgba(217,164,65,0.08); border-left: 2px solid #D9A441;"
+                        onmouseover="this.style.background='rgba(217,164,65,0.18)'" onmouseout="this.style.background='rgba(217,164,65,0.08)'">Batched (every 2 hrs)</div>
+                      <div class="freq-opt" onclick="selectFreq(this)" style="padding: 10px 14px; color: #F5E6C8; font-family: 'Rajdhani', sans-serif; font-size: 14px; cursor: pointer; transition: background 0.15s;"
+                        onmouseover="this.style.background='rgba(217,164,65,0.12)'" onmouseout="this.style.background='transparent'">Daily digest</div>
+                    </div>
+                  </div>
+                  <script>
+                    function toggleFreqDrop() {
+                      const list = document.getElementById('freqList');
+                      list.style.display = list.style.display === 'none' ? 'block' : 'none';
+                    }
+                    function selectFreq(el) {
+                      document.getElementById('freqSelected').childNodes[0].textContent = el.textContent.trim() + ' ';
+                      // Reset all opts
+                      document.querySelectorAll('.freq-opt').forEach(o => {
+                        o.style.color = '#F5E6C8';
+                        o.style.background = 'transparent';
+                        o.style.borderLeft = 'none';
+                      });
+                      el.style.color = '#D9A441';
+                      el.style.background = 'rgba(217,164,65,0.08)';
+                      el.style.borderLeft = '2px solid #D9A441';
+                      document.getElementById('freqList').style.display = 'none';
+                    }
+                    // Close dropdown on outside click
+                    document.addEventListener('click', function(e) {
+                      if (!e.target.closest('.custom-freq-wrap')) {
+                        document.getElementById('freqList').style.display = 'none';
+                      }
+                    });
+                  </script>
                 </div>
               </div>
             </div>
@@ -1823,6 +2080,19 @@
         });
       });
     </script>
-
+    <script>
+    /* ── MOBILE MENU ── */
+    (function(){
+      const btn = document.getElementById('mobileMenuBtn');
+      const dropdown = document.getElementById('mobileDropdown');
+      const overlay = document.getElementById('mobileMenuOverlay');
+      if (!btn || !dropdown || !overlay) return;
+      function openMenu(){ dropdown.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+      function closeMenu(){ dropdown.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+      btn.addEventListener('click', ()=> dropdown.classList.contains('open') ? closeMenu() : openMenu());
+      overlay.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => e.key === 'Escape' && closeMenu());
+    })();
+    </script>
 </body>
 </html>
